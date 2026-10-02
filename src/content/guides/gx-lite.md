@@ -1,14 +1,11 @@
 ---
-product: "gx-lite"
-token: "b2c3d4e5f6a1789012345678"
-title: "Guide de démarrage rapide et configuration RTK — GX-Lite"
-youtube: ["dQw4w9WgXcQ"]
+product: "unistrong-g970ii-pro"
+token: "sec_unistrong_g970ii_pro_guide_2026"
+title: "Guide d'utilisation SurPad 4.2 & UniStrong G970II Pro"
+youtube:
+  - "dQw4w9WgXcQ"
 ---
 
-# Guide de démarrage rapide et configuration RTK — GX-Lite
+# Guide d'utilisation SurPad 4.2 & UniStrong G970II Pro
 
-*Document réservé exclusivement aux clients GéoTopo Bénin ayant fait l'acquisition de cet appareil.*
-
-## 1. Mises en garde et vérifications terrain
-
-Avant toute campagne de mesure, veuillez vérifier la charge complète des batteries et le bon calage du trépied.
+Ce guide vous explique pas à pas comment configurer votre base et mobile RTK.

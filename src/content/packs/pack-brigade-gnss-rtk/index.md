@@ -1,16 +1,16 @@
 ---
-title: "Pack Brigade Cadastre RTK + Drone"
-summary: "Pack haute précision combinant le récepteur GNSS RTK centimétrique GX-Lite et le drone photogrammétrique DP-RTK."
-cover: ./cover.webp
-products: ["gx-lite", "dp-rtk", "ta-160"]
-
-availability: "sur-commande"
-leadTime: "15 à 25 jours"
+title: "Pack Brigade GNSS RTK Master"
+summary: "Système complet Base + Mobile GNSS RTK 1408 canaux avec carnet Android, trépieds et radio 35W."
+cover: "./cover.webp"
+products:
+  - "efix-f8-visual-rtk"
+  - "unistrong-g970ii-pro"
+price: 6900000
+availability: "en-boutique"
+leadTime: "En stock à Cotonou"
 featured: true
 order: 2
-draft: false
 ---
 
-## À propos de ce pack
-
-Le **Pack Brigade Cadastre RTK + Drone** regroupe les équipements indispensables présélectionnés par nos géomètres conseils pour maximiser votre rendement sur le terrain.
+### Pack Brigade GNSS RTK Master
+Le pack ultime combinant le récepteur visuel EFIX F8 avec double caméra et l'UniStrong G970II Pro pour des levés d'une efficacité inégalée.

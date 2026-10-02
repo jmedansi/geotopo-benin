@@ -11,7 +11,7 @@ export const site = {
   nameShort: "GéoTopo",
 
   /** Domaine de production (sans slash final) */
-  url: "https://geotopo-benin.pages.dev",
+  url: "https://topo.incidenx.com",
 
   /** Slogan principal affiché dans le hero */
   tagline: "L'Importateur & Distributeur N°1 d'Équipements Topographiques au Bénin et en Afrique Francophone.",

@@ -7,9 +7,8 @@ export default defineConfig({
   // Sortie 100 % statique
   output: "static",
 
-  // Domaine de production — doit correspondre à site.domain dans src/config/site.ts
-  // (nécessaire pour le sitemap et les URLs canoniques)
-  site: "https://geotopo-benin.example",
+  // Domaine de production
+  site: "https://topo.incidenx.com",
 
   integrations: [
     sitemap({
