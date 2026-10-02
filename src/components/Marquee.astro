@@ -1,0 +1,63 @@
+---
+/**
+ * Marquee.astro — Bande de défilement horizontal infini.
+ * Fait défiler son contenu en boucle et s'interrompt au survol.
+ */
+
+interface Props {
+  speed?: number; // secondes
+  class?: string;
+}
+
+const { speed = 25, class: extraClass = "" } = Astro.props;
+---
+
+<div class={`topo-marquee ${extraClass}`.trim()} data-marquee>
+  <div class="topo-marquee__track" style={`--marquee-duration: ${speed}s;`}>
+    <div class="topo-marquee__content">
+      <slot />
+    </div>
+    <!-- Duplication invisible pour défilement fluide sans trou -->
+    <div class="topo-marquee__content" aria-hidden="true">
+      <slot />
+    </div>
+  </div>
+</div>
+
+<style>
+.topo-marquee {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+}
+
+.topo-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: marqueeScroll var(--marquee-duration, 25s) linear infinite;
+}
+
+.topo-marquee:hover .topo-marquee__track {
+  animation-play-state: paused;
+}
+
+.topo-marquee__content {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding-inline: var(--space-4);
+}
+
+@keyframes marqueeScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .topo-marquee__track {
+    animation: none;
+  }
+}
+</style>

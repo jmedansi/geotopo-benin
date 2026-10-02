@@ -1,0 +1,138 @@
+/* ============================================================
+   tokens.css — Design system Pro Max GéoTopo Bénin
+   Direction : 100% Dark Mode Consistant & Contraste Maximal (WCAG AAA)
+   ============================================================ */
+
+:root {
+  /* ----------------------------------------------------------
+     Couleurs — Palette Dark Consistante & Haute Visibilité
+     ---------------------------------------------------------- */
+
+  /* Arrière-plans principaux (Fond uni sombre uniforme) */
+  --color-bg:           #0B0E14;   /* Noir Carbone Pur */
+  --color-bg-alt:       #121722;   /* Slate Graphite */
+  --color-surface:      #1A2230;   /* Surface Carte Élevée */
+  --color-surface-hover:#242F42;   /* Surface Hover */
+  --color-surface-glass:rgba(26, 34, 48, 0.85);
+
+  /* Effacer toute confusion clair/sombre : toutes les sections sont sombres et lisibles */
+  --color-light-bg:     #121722;
+  --color-light-surface:#1A2230;
+  --color-light-border: rgba(255, 255, 255, 0.12);
+  --color-light-text:   #FFFFFF;
+
+  /* Bordures à fort contraste */
+  --color-border:       rgba(255, 255, 255, 0.12);
+  --color-border-strong:rgba(255, 255, 255, 0.25);
+  --color-border-glow:  #FF6B00;
+
+  /* Typographie — Contraste Maximal (Blanc Pur & Gris Clair) */
+  --color-text:         #FFFFFF;   /* Titres et textes principaux : Blanc pur */
+  --color-text-muted:   #E2E8F0;   /* Paragraphes & détails : Gris très clair lisible */
+  --color-text-faint:   #94A3B8;   /* Métadonnées & sous-titres secondaires */
+  --color-text-on-accent: #FFFFFF;
+
+  /* Accent principal — Ember Orange Chantiers */
+  --color-accent:       #FF6B00;
+  --color-accent-light: #FF8533;
+  --color-accent-dark:  #D95B00;
+  --color-accent-glow:  rgba(255, 107, 0, 0.4);
+  --color-accent-bg:    rgba(255, 107, 0, 0.15);
+
+  /* Accent secondaire — Laser Cyan */
+  --color-laser:        #00E5FF;
+  --color-laser-glow:   rgba(0, 229, 255, 0.4);
+
+  /* Badges de disponibilité à haut contraste */
+  --color-badge-boutique-bg:   #064E3B;
+  --color-badge-boutique-text: #4ADE80;
+  --color-badge-boutique-border:#10B981;
+  
+  --color-badge-commande-bg:   #78350F;
+  --color-badge-commande-text: #FBBF24;
+  --color-badge-commande-border:#F59E0B;
+
+  /* ----------------------------------------------------------
+     Typographie
+     ---------------------------------------------------------- */
+  --font-serif:  "Georgia", "Times New Roman", serif;
+  --font-sans:   -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono:   "SFMono-Regular", Consolas, monospace;
+
+  /* Échelle typographique */
+  --text-xs:    0.75rem;
+  --text-sm:    0.875rem;
+  --text-base:  1rem;
+  --text-lg:    1.125rem;
+  --text-xl:    1.25rem;
+  --text-2xl:   1.5rem;
+  --text-3xl:   2rem;
+  --text-4xl:   2.5rem;
+  --text-5xl:   3.5rem;
+
+  --weight-normal:   400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+  --weight-black:    900;
+
+  --leading-tight:  1.15;
+  --leading-snug:   1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.65;
+
+  --tracking-tight:  -0.03em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.03em;
+  --tracking-wider:   0.08em;
+  --tracking-widest:  0.15em;
+
+  /* ----------------------------------------------------------
+     Espacements
+     ---------------------------------------------------------- */
+  --space-1:   0.25rem;
+  --space-2:   0.5rem;
+  --space-3:   0.75rem;
+  --space-4:   1rem;
+  --space-5:   1.25rem;
+  --space-6:   1.5rem;
+  --space-8:   2rem;
+  --space-10:  2.5rem;
+  --space-12:  3rem;
+  --space-16:  4rem;
+  --space-20:  5rem;
+  --space-24:  6rem;
+
+  /* ----------------------------------------------------------
+     Rayons
+     ---------------------------------------------------------- */
+  --radius-sm:   0.375rem;
+  --radius-md:   0.625rem;
+  --radius-lg:   1rem;
+  --radius-xl:   1.25rem;
+  --radius-2xl:  1.75rem;
+  --radius-full: 9999px;
+
+  /* ----------------------------------------------------------
+     Ombres
+     ---------------------------------------------------------- */
+  --shadow-xs:  0 2px 4px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm:  0 4px 12px 0 rgba(0, 0, 0, 0.6);
+  --shadow-md:  0 8px 24px -4px rgba(0, 0, 0, 0.7);
+  --shadow-lg:  0 16px 40px -8px rgba(0, 0, 0, 0.8);
+  --shadow-glow: 0 0 25px rgba(255, 107, 0, 0.35);
+
+  --transition-fast:   180ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-base:   300ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow:   500ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  --container-max:     1280px;
+  --container-padding: var(--space-5);
+  --header-height:     72px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --container-padding: var(--space-10);
+  }
+}

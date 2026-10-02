@@ -1,0 +1,408 @@
+---
+/**
+ * sur-mesure.astro — Formulaire guidé de recherche d'équipement sur-mesure.
+ * Conforme à la spec PROMPT 6 du guide.
+ */
+
+import Base from "../layouts/Base.astro";
+import Contours from "../components/Contours.astro";
+import Crosshair from "../components/Crosshair.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ScrollProgress from "../components/ScrollProgress.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+
+import { site } from "../config/site";
+import { waLink } from "../lib/whatsapp";
+---
+
+<Base
+  title="Matériel Sur-Mesure & Sourcing Spécialisé"
+  description="Vous cherchez une référence spécifique non listée dans notre catalogue ? GéoTopo Bénin s'occupe du sourcing, de l'importation et du contrôle de vos équipements topographiques."
+>
+  <ScrollProgress />
+  <Crosshair />
+
+  <!-- Hero Sur-Mesure -->
+  <section class="sur-mesure-hero" data-crosshair>
+    <Contours variant="hero" draw={true} />
+    <div class="container sur-mesure-hero__inner">
+      <Breadcrumbs items={[{ label: "Sur-mesure" }]} />
+      <span class="sur-mesure-hero__eyebrow">SOURCING DE PRÉCISION</span>
+      <h1 class="sur-mesure-hero__title" data-reveal="up">
+        Vous ne trouvez pas votre équipement ?
+      </h1>
+      <p class="sur-mesure-hero__subtitle" data-reveal="up" data-reveal-delay="100">
+        Notre réseau d'approvisionnement auprès des plus grands fabricants mondiaux (FOIF, Leica, South, CHCNAV, Sokkia) nous permet d'importer directement tout modèle spécifique sur commande.
+      </p>
+    </div>
+  </section>
+
+  <!-- Formulaire & Explications -->
+  <section class="section">
+    <div class="container">
+      <div class="sur-mesure-layout">
+        <!-- Formulaire de Demande -->
+        <div class="sur-mesure-form-card" data-reveal="up">
+          <h2 class="form-card__title">Configurez votre demande sur-mesure</h2>
+          <p class="form-card__desc">
+            Remplissez ce questionnaire guidé pour générer votre fiche de besoin et la transmettre directement sur WhatsApp à nos géomètres acheteurs.
+          </p>
+
+          <form id="sur-mesure-form" class="sur-mesure-form">
+            <!-- Étape 1 : Type de Matériel -->
+            <div class="form-group">
+              <label class="form-label" for="type-materiel">1. Type d'équipement recherché *</label>
+              <select id="type-materiel" class="form-select" required>
+                <option value="Station Totale">Station Totale (Série classique ou robotisée)</option>
+                <option value="Récepteur GNSS RTK">Récepteur GNSS RTK (Base / Mobile / Rover)</option>
+                <option value="Drone Photogrammétrie">Drone de photogrammétrie / Lidar</option>
+                <option value="Niveau Optique ou Numérique">Niveau optique de haute précision ou numérique</option>
+                <option value="Laser de Chantier">Laser rotatif / Laser canalisation</option>
+                <option value="Accessoires Spécialisés">Accessoire spécifique (Prisme, mire, trépied, batterie...)</option>
+                <option value="Autre matériel">Autre équipement de mesure / géodésie</option>
+              </select>
+            </div>
+
+            <!-- Étape 2 : Application / Domaine -->
+            <div class="form-group">
+              <label class="form-label" for="domaine-usage">2. Domaine d'application principal</label>
+              <select id="domaine-usage" class="form-select">
+                <option value="Foncier & Bornage">Foncier & Bornage cadastral</option>
+                <option value="BTP & Infrastructures">BTP, Routes & Infrastructures</option>
+                <option value="Mines & Carrières">Mines, Carrières & Topographie souterraine</option>
+                <option value="Nivellement de précision">Nivellement d'art & Réseaux d'assainissement</option>
+                <option value="SIG & Cartographie drone">SIG, Cartographie aérienne & Modélisation 3D</option>
+              </select>
+            </div>
+
+            <!-- Étape 3 : Urgence / Impératif -->
+            <div class="form-group">
+              <label class="form-label" for="delai-souhaite">3. Délai de livraison souhaité</label>
+              <select id="delai-souhaite" class="form-select">
+                <option value="Urgent (< 10 jours)">⚡ Urgent (< 10 jours ouvrés)</option>
+                <option value="Standard (15 à 20 jours)">📦 Standard (15 à 20 jours)</option>
+                <option value="Planification projet (> 1 mois)">🗓️ Projet à venir (> 1 mois)</option>
+              </select>
+            </div>
+
+            <!-- Étape 4 : Description textuelle -->
+            <div class="form-group">
+              <label class="form-label" for="description-besoin">
+                4. Marque, référence exacte ou fonctionnalités requises *
+              </label>
+              <textarea
+                id="description-besoin"
+                class="form-textarea"
+                rows="4"
+                placeholder="Ex: Je recherche un récepteur FOIF A90 avec carnet Android HCE300, précision millimétrique, avec pack 2 batteries..."
+                required
+              ></textarea>
+            </div>
+
+            <!-- Étape 5 : Lieu de livraison -->
+            <div class="form-group">
+              <label class="form-label" for="lieu-livraison">5. Ville ou zone de livraison au Bénin</label>
+              <input
+                type="text"
+                id="lieu-livraison"
+                class="form-input"
+                placeholder="Ex: Cotonou, Parakou, Natitingou, Porto-Novo..."
+                value="Cotonou"
+              />
+            </div>
+
+            <button type="submit" class="btn btn--accent btn--lg btn--full btn-submit-whatsapp">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.48 1.333 4.993l-1.416 5.176 5.297-1.389c1.458.796 3.104 1.216 4.773 1.217h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.038-5.176-2.924-7.063-1.886-1.887-4.393-2.925-7.066-2.925zm0 1.667c4.586 0 8.322 3.737 8.323 8.322 0 4.586-3.737 8.323-8.324 8.323-1.488 0-2.946-.395-4.223-1.144l-.303-.179-3.137.822.837-3.056-.197-.314a8.275 8.275 0 01-1.298-4.453c0-4.585 3.738-8.321 8.322-8.321z"/>
+              </svg>
+              <span>Transmettre ma demande sur WhatsApp</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Colonne d'explication du Sourcing -->
+        <div class="sur-mesure-info-col" data-reveal="up" data-reveal-delay="150">
+          <div class="sourcing-steps-card">
+            <h3 class="sourcing-steps__title">Comment fonctionne le sur-mesure ?</h3>
+            
+            <div class="sourcing-step">
+              <div class="sourcing-step__num">01</div>
+              <div class="sourcing-step__content">
+                <strong>Étude & Recherche sous 24h</strong>
+                <p>Nous vérifions la disponibilité auprès du réseau officiel du constructeur et vous adressons une proforma chiffrée.</p>
+              </div>
+            </div>
+
+            <div class="sourcing-step">
+              <div class="sourcing-step__num">02</div>
+              <div class="sourcing-step__content">
+                <strong>Importation Express Sécurisée</strong>
+                <p>Expédition prioritaire par fret aérien sécurisé avec dédouanement complet pris en charge par nos équipes.</p>
+              </div>
+            </div>
+
+            <div class="sourcing-step">
+              <div class="sourcing-step__num">03</div>
+              <div class="sourcing-step__content">
+                <strong>Étalonnage & Contrôle Local</strong>
+                <p>À l'arrivée dans notre atelier à Cotonou, chaque instrument subit un test sur base géodésique contrôlée.</p>
+              </div>
+            </div>
+
+            <div class="sourcing-step">
+              <div class="sourcing-step__num">04</div>
+              <div class="sourcing-step__content">
+                <strong>Livraison & Prise en Main</strong>
+                <p>Remise en main propre avec certificat de contrôle, garantie constructeur et formation pratique gratuite.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Encadré Engagement Pro -->
+          <div class="sourcing-guarantee-card">
+            <span class="guarantee-icon">🛡️</span>
+            <div>
+              <strong>Garantie Authenticité & Zéro Contrefaçon</strong>
+              <p>Tous les appareils importés sont 100% originaux, neufs et enregistrés dans la base constructeur avec numéro de série traçable.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+.sur-mesure-hero {
+  position: relative;
+  background-color: var(--color-bg-alt);
+  color: #FFFFFF;
+  padding-block: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.sur-mesure-hero__inner {
+  position: relative;
+  z-index: 2;
+}
+
+
+.sur-mesure-hero__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+}
+
+.sur-mesure-hero__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-block: var(--space-3);
+}
+
+.sur-mesure-hero__subtitle {
+  font-size: var(--text-lg);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+}
+
+.sur-mesure-layout {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .sur-mesure-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sur-mesure-form-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+}
+
+.form-card__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-2);
+}
+
+.form-card__desc {
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+  margin-bottom: var(--space-6);
+  line-height: var(--leading-relaxed);
+}
+
+.sur-mesure-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.form-label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: #FFFFFF;
+}
+
+.form-select,
+.form-input,
+.form-textarea {
+  width: 100%;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.form-select:focus,
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.btn-submit-whatsapp {
+  margin-top: var(--space-4);
+  background-color: #25D366;
+  color: #FFFFFF;
+  border: none;
+}
+
+.btn-submit-whatsapp:hover {
+  background-color: #20bd5a;
+}
+
+/* Colonne d'information */
+.sourcing-steps-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.sourcing-steps__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-6);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sourcing-step {
+  display: flex;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+}
+
+.sourcing-step:last-child {
+  margin-bottom: 0;
+}
+
+.sourcing-step__num {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  background-color: rgba(255, 107, 0, 0.15);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sourcing-step__content strong {
+  display: block;
+  font-size: var(--text-sm);
+  color: #FFFFFF;
+  margin-bottom: 2px;
+}
+
+.sourcing-step__content p {
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+  margin: 0;
+}
+
+.sourcing-guarantee-card {
+  display: flex;
+  gap: var(--space-3);
+  background-color: rgba(0, 229, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.guarantee-icon {
+  font-size: 28px;
+}
+
+.sourcing-guarantee-card strong {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-cyan);
+  margin-bottom: 2px;
+}
+
+.sourcing-guarantee-card p {
+  font-size: 11px;
+  color: #E2E8F0;
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+</style>
+
+<script>
+  import { site } from "../config/site";
+
+  document.getElementById("sur-mesure-form")?.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const typeMat = (document.getElementById("type-materiel") as HTMLSelectElement).value;
+    const domaine = (document.getElementById("domaine-usage") as HTMLSelectElement).value;
+    const delai = (document.getElementById("delai-souhaite") as HTMLSelectElement).value;
+    const desc = (document.getElementById("description-besoin") as HTMLTextAreaElement).value.trim();
+    const lieu = (document.getElementById("lieu-livraison") as HTMLInputElement).value.trim();
+
+    let message = `Bonjour ${site.name}, je souhaite une recherche d'équipement sur-mesure :\n\n`;
+    message += `• Type d'appareil : ${typeMat}\n`;
+    message += `• Usage principal : ${domaine}\n`;
+    message += `• Délai souhaité : ${delai}\n`;
+    message += `• Zone de livraison : ${lieu || "Cotonou"}\n`;
+    message += `• Description du besoin : ${desc}\n\n`;
+    message += `Merci de me recontacter avec une proposition tarifaire et proforma.`;
+
+    const waUrl = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank");
+  });
+</script>

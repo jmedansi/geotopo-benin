@@ -1,0 +1,126 @@
+---
+/**
+ * Lightbox.astro — Modale d'agrandissement d'image pleine page.
+ * Accessible : piège du focus, fermeture touche Échap, bouton de fermeture.
+ */
+---
+
+<div
+  id="topo-lightbox"
+  class="topo-lightbox"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Agrandissement de l'image"
+  hidden
+>
+  <div class="topo-lightbox__overlay" id="lightbox-overlay"></div>
+  
+  <div class="topo-lightbox__content">
+    <button
+      type="button"
+      class="topo-lightbox__close"
+      id="lightbox-close"
+      aria-label="Fermer l'agrandissement"
+    >
+      &times;
+    </button>
+    <img id="lightbox-img" src="" alt="" class="topo-lightbox__img" />
+  </div>
+</div>
+
+<style>
+.topo-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+}
+
+.topo-lightbox[hidden] {
+  display: none !important;
+}
+
+.topo-lightbox__overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(4px);
+}
+
+.topo-lightbox__content {
+  position: relative;
+  z-index: 2;
+  max-width: 90vw;
+  max-height: 90vh;
+}
+
+.topo-lightbox__img {
+  max-width: 100%;
+  max-height: 85vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-xl);
+}
+
+.topo-lightbox__close {
+  position: absolute;
+  top: -40px;
+  right: -10px;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 36px;
+  line-height: 1;
+  cursor: pointer;
+}
+</style>
+
+<script>
+function initLightbox() {
+  const lightbox = document.getElementById("topo-lightbox");
+  const overlay  = document.getElementById("lightbox-overlay");
+  const closeBtn = document.getElementById("lightbox-close");
+  const imgEl    = document.getElementById("lightbox-img") as HTMLImageElement | null;
+
+  if (!lightbox || !imgEl) return;
+
+  function close() {
+    lightbox?.setAttribute("hidden", "");
+    document.body.style.overflow = "";
+  }
+
+  function open(src: string, alt: string) {
+    if (!imgEl) return;
+    imgEl.src = src;
+    imgEl.alt = alt;
+    lightbox?.removeAttribute("hidden");
+    document.body.style.overflow = "hidden";
+    closeBtn?.focus();
+  }
+
+  overlay?.addEventListener("click", close);
+  closeBtn?.addEventListener("click", close);
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !lightbox.hasAttribute("hidden")) {
+      close();
+    }
+  });
+
+  // Déclencher l'ouverture depuis un élément avec data-lightbox-src
+  document.addEventListener("click", (e) => {
+    const target = (e.target as HTMLElement).closest<HTMLElement>("[data-lightbox-src]");
+    if (target) {
+      const src = target.dataset.lightboxSrc;
+      const alt = target.dataset.lightboxAlt || "Image agrandie";
+      if (src) open(src, alt);
+    }
+  });
+}
+
+initLightbox();
+document.addEventListener("astro:page-load", initLightbox);
+</script>

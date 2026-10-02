@@ -1,0 +1,179 @@
+---
+/**
+ * packs.astro — Page de liste de tous les packs d'équipements.
+ * Conforme à la spec PROMPT 5 du guide.
+ */
+
+import Base from "../layouts/Base.astro";
+import Contours from "../components/Contours.astro";
+import Crosshair from "../components/Crosshair.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import PackCard from "../components/PackCard.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ScrollProgress from "../components/ScrollProgress.astro";
+
+import { getPacks } from "../lib/catalog";
+
+const packs = await getPacks();
+
+// Map des produits inclus pour chaque pack
+const packProductsMap = {
+  "pack-topographe-complet": ["Station Totale ST-M5", "Trépied Aluminium TA-160", "Mire Télescopique MT-5"],
+  "pack-brigade-gnss-rtk": ["Récepteur GNSS RTK GX-Lite", "Drone Photogrammétrie DP-RTK", "Trépied Aluminium TA-160"],
+  "pack-nivellement-expert": ["Niveau Optique NO-32", "Laser Rotatif Chantier LR-500", "Mire Télescopique MT-5"],
+};
+---
+
+<Base title="Packs d'Équipements Topo" description="Découvrez nos packs clé en main prêts pour le terrain. Solutions complètes combinant stations totales, récepteurs GNSS RTK, lasers et trépieds.">
+  <ScrollProgress />
+  <Crosshair />
+
+  <!-- Hero Packs -->
+  <section class="packs-hero" data-crosshair>
+    <Contours variant="hero" draw={true} />
+    <div class="container packs-hero__inner">
+      <Breadcrumbs items={[{ label: "Packs complets" }]} />
+      <span class="packs-hero__eyebrow">KITS CLÉ EN MAIN</span>
+      <h1 class="packs-hero__title" data-reveal="up">
+        Packs & Ensembles Topographiques
+      </h1>
+      <p class="packs-hero__subtitle" data-reveal="up" data-reveal-delay="100">
+        Bénéficiez de sous-ensembles complets présélectionnés par nos géomètres conseils. Équipements 100% compatibles avec tarif préférentiel et demi-journée de formation offerte.
+      </p>
+    </div>
+  </section>
+
+  <!-- Grille des Packs -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="SOLUTIONS TERRAIN"
+        title="Nos packs disponibles"
+        subtitle="Choisissez la configuration adaptée à votre type de chantier ou d'intervention."
+      />
+
+      <div class="grid-packs-page" data-stagger="0.1">
+        {packs.map((pack) => (
+          <PackCard
+            pack={pack}
+            productNames={packProductsMap[pack.id as keyof typeof packProductsMap] || []}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Avantages des Packs -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading
+        eyebrow="POURQUOI CHOISIR UN PACK ?"
+        title="Les avantages de l'achat en ensemble"
+      />
+
+      <div class="grid-pack-advantages" data-stagger="0.08">
+        <div class="advantage-card" data-reveal="up">
+          <div class="advantage-card__icon">💰</div>
+          <h3 class="advantage-card__title">Tarif avantageux</h3>
+          <p class="advantage-card__text">
+            Jusqu'à 15% d'économie par rapport à l'achat individuel des équipements et accessoires séparés.
+          </p>
+        </div>
+
+        <div class="advantage-card" data-reveal="up">
+          <div class="advantage-card__icon">⚙️</div>
+          <h3 class="advantage-card__title">Compatibilité 100% garantie</h3>
+          <p class="advantage-card__text">
+            Chaque élément du pack (pas de vis 5/8'', embouts, fréquences radio, constantes de prisme) est vérifié pour s'assembler sans aucun adaptateur.
+          </p>
+        </div>
+
+        <div class="advantage-card" data-reveal="up">
+          <div class="advantage-card__icon">🎓</div>
+          <h3 class="advantage-card__title">Formation offerte à Cotonou</h3>
+          <p class="advantage-card__text">
+            Une demi-journée de prise en main pratique et de paramétrage est offerte dans nos locaux lors de la remise de votre coffret.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+.packs-hero {
+  position: relative;
+  background-color: var(--color-bg-alt);
+  color: #FFFFFF;
+  padding-block: var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.packs-hero__inner {
+  position: relative;
+  z-index: 2;
+}
+
+
+.packs-hero__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+.packs-hero__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-block: var(--space-3);
+}
+
+.packs-hero__subtitle {
+  font-size: var(--text-lg);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+}
+
+.grid-packs-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: var(--space-8);
+}
+
+.grid-pack-advantages {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-6);
+}
+
+.advantage-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+
+.advantage-card__icon {
+  font-size: 32px;
+  margin-bottom: var(--space-3);
+}
+
+.advantage-card__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-2);
+}
+
+.advantage-card__text {
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+}
+</style>

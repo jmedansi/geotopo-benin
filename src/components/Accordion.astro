@@ -1,0 +1,149 @@
+---
+/**
+ * Accordion.astro — Composant FAQ / Accordéon interactif accessible.
+ */
+
+interface Item {
+  q: string;
+  a: string;
+}
+
+interface Props {
+  items: Item[];
+  class?: string;
+}
+
+const { items, class: extraClass = "" } = Astro.props;
+---
+
+<div class={`topo-accordion ${extraClass}`.trim()}>
+  {items.map((item, idx) => (
+    <div class="topo-accordion__item">
+      <button
+        type="button"
+        class="topo-accordion__button"
+        id={`acc-btn-${idx}`}
+        aria-expanded="false"
+        aria-controls={`acc-panel-${idx}`}
+      >
+        <span class="topo-accordion__question">{item.q}</span>
+        <svg class="topo-accordion__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+      <div
+        id={`acc-panel-${idx}`}
+        class="topo-accordion__panel"
+        role="region"
+        aria-labelledby={`acc-btn-${idx}`}
+        hidden
+      >
+        <div class="topo-accordion__content">
+          <p>{item.a}</p>
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
+
+<style>
+.topo-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.topo-accordion__item {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.topo-accordion__button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+  padding: var(--space-4) var(--space-6);
+  text-align: left;
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  background: none;
+  border: none;
+  cursor: pointer;
+  min-height: 52px;
+}
+
+.topo-accordion__button:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-accent);
+}
+
+.topo-accordion__icon {
+  flex-shrink: 0;
+  transition: transform var(--transition-base);
+}
+
+.topo-accordion__button[aria-expanded="true"] .topo-accordion__icon {
+  transform: rotate(180deg);
+  color: var(--color-accent);
+}
+
+.topo-accordion__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--transition-base);
+}
+
+.topo-accordion__panel:not([hidden]) {
+  display: grid;
+  grid-template-rows: 1fr;
+}
+
+.topo-accordion__content {
+  overflow: hidden;
+  padding-inline: var(--space-6);
+  padding-bottom: var(--space-4);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  line-height: var(--leading-relaxed);
+}
+</style>
+
+<script>
+function initAccordions() {
+  const buttons = document.querySelectorAll<HTMLButtonElement>(".topo-accordion__button");
+
+  buttons.forEach((btn) => {
+    if (btn.dataset.accInit) return;
+    btn.dataset.accInit = "true";
+
+    btn.addEventListener("click", () => {
+      const isExpanded = btn.getAttribute("aria-expanded") === "true";
+      const panelId = btn.getAttribute("aria-controls");
+      if (!panelId) return;
+
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+
+      if (isExpanded) {
+        btn.setAttribute("aria-expanded", "false");
+        panel.setAttribute("hidden", "");
+      } else {
+        btn.setAttribute("aria-expanded", "true");
+        panel.removeAttribute("hidden");
+      }
+    });
+  });
+}
+
+initAccordions();
+document.addEventListener("astro:page-load", initAccordions);
+</script>

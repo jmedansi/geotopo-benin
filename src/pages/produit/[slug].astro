@@ -1,0 +1,646 @@
+---
+/**
+ * src/pages/produit/[slug].astro — Fiche produit détaillée Pro Max.
+ * Conforme à la spec PROMPT 4 du guide.
+ */
+
+import { render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Contours from "../../components/Contours.astro";
+import Crosshair from "../../components/Crosshair.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import Gallery from "../../components/Gallery.astro";
+import Lightbox from "../../components/Lightbox.astro";
+import YouTubeEmbed from "../../components/YouTubeEmbed.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import AddToCart from "../../components/AddToCart.astro";
+import WhatsAppButton from "../../components/WhatsAppButton.astro";
+import Counter from "../../components/Counter.astro";
+import Tabs from "../../components/Tabs.astro";
+import ScrollProgress from "../../components/ScrollProgress.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+
+import { site } from "../../config/site";
+import { getProducts, getRelated, getGuideFor, getCategoryBySlug } from "../../lib/catalog";
+import { formatPrice, isSurDevis } from "../../lib/price";
+import { waMessageProduit, waMessageDevis, waLink } from "../../lib/whatsapp";
+
+export async function getStaticPaths() {
+  const products = await getProducts();
+  return products.map((prod) => ({
+    params: { slug: prod.id },
+    props: { product: prod },
+  }));
+}
+
+const { product } = Astro.props;
+const {
+  title,
+  category: catSlug,
+  brand,
+  summary,
+  cover,
+  gallery = [],
+  youtube = [],
+  availability,
+  leadTime,
+  features = [],
+  specs,
+  price,
+  highlights = [],
+  included = [],
+  useCases = [],
+} = product.data;
+
+const { Content } = await render(product);
+
+const categoryObj = await getCategoryBySlug(catSlug);
+const catTitle = categoryObj?.data.title || catSlug;
+
+const relatedProducts = await getRelated(product.id, catSlug, 4);
+const guideObj = await getGuideFor(product.id);
+
+const formattedPrice = formatPrice(price);
+const devisMode = isSurDevis(price);
+const isBoutique = availability === "en-boutique";
+
+// URL absolue de la fiche
+const pageUrl = new URL(Astro.url.pathname, site.url).toString();
+
+// Message WhatsApp
+const waMessage = devisMode
+  ? waMessageDevis(title, pageUrl)
+  : waMessageProduit(title, formattedPrice, pageUrl);
+
+const questionMessage = `Bonjour, j'ai une question concernant le produit : ${title} (${pageUrl})`;
+
+// Onglets de la fiche
+const productTabs = [
+  { id: "desc", label: "Description" },
+  { id: "specs", label: "Spécifications" },
+  ...(youtube.length > 0 ? [{ id: "videos", label: "Vidéos" }] : []),
+  { id: "livraison", label: "Livraison & Garantie" },
+];
+
+// JSON-LD Product pour le SEO
+const jsonLd = {
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  name: title,
+  description: summary,
+  image: [cover.src],
+  brand: {
+    "@type": "Brand",
+    name: brand || "GéoTopo",
+  },
+  ...(price
+    ? {
+        offers: {
+          "@type": "Offer",
+          priceCurrency: site.currency,
+          price: price,
+          availability: isBoutique
+            ? "https://schema.org/InStock"
+            : "https://schema.org/PreOrder",
+          url: pageUrl,
+        },
+      }
+    : {}),
+};
+---
+
+<Base title={title} description={summary} ogImage={cover.src}>
+  <ScrollProgress />
+  <Crosshair />
+  <Lightbox />
+
+  <!-- Injection JSON-LD SEO -->
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+  <!-- Section Fiche Produit -->
+  <section class="section product-page">
+    <div class="container">
+      <Breadcrumbs
+        items={[
+          { label: "Boutique", href: "/boutique" },
+          { label: catTitle, href: `/categorie/${catSlug}` },
+          { label: title },
+        ]}
+      />
+
+      <div class="product-grid-layout">
+        <!-- Colonne Gauche : Galerie + Vidéos -->
+        <div class="product-media-col" data-reveal="up">
+          <Gallery cover={cover} gallery={gallery} title={title} />
+        </div>
+
+        <!-- Colonne Droite : Infos & Achat sticky -->
+        <div class="product-info-col" data-reveal="up" data-reveal-delay="150">
+          <div class="product-header">
+            {brand && <span class="product-brand">{brand}</span>}
+            <h1 class="product-title">{title}</h1>
+            
+            <div class="product-badges">
+              {isBoutique ? (
+                <span class="badge badge--boutique">En boutique — Disponible Cotonou</span>
+              ) : (
+                <span class="badge badge--commande">Sur commande {leadTime ? `(${leadTime})` : ""}</span>
+              )}
+            </div>
+          </div>
+
+          <!-- Tarif -->
+          <div class="product-price-box">
+            <span class="product-price-label">Prix indicatif</span>
+            <span class={`product-price-val ${devisMode ? "is-devis" : ""}`}>
+              {formattedPrice}
+            </span>
+            {devisMode && (
+              <p class="product-price-sub">Prix variable selon options et quantité. Devis immédiat sur WhatsApp.</p>
+            )}
+          </div>
+
+          <!-- Actions d'achat desktop -->
+          <div class="product-actions-desktop">
+            <AddToCart slug={product.id} type="produit" size="lg" variant="outline" full={true} />
+            <WhatsAppButton
+              message={waMessage}
+              label={devisMode ? "Demander un devis sur WhatsApp" : "Commander sur WhatsApp"}
+              variant="whatsapp"
+              size="lg"
+              full={true}
+            />
+            
+            <a href={waLink(questionMessage)} target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn--full">
+              ❓ Poser une question sur cet appareil
+            </a>
+          </div>
+
+          <!-- Points forts terrain -->
+          {features.length > 0 && (
+            <div class="product-features-box">
+              <h3 class="product-features-title">Points forts du modèle :</h3>
+              <ul class="product-features-list">
+                {features.map((f) => (
+                  <li>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="3">
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <!-- Mention du guide secret si présent (SANS AUCUN LIEN) -->
+          {guideObj && (
+            <div class="guide-notice-box">
+              <span class="guide-notice-icon">📘</span>
+              <div class="guide-notice-content">
+                <strong>Guide d'utilisation réservé</strong>
+                <p>Un guide de mise en station et d'étalonnage est disponible après achat. Demandez votre lien d'accès secret sur WhatsApp lors de la livraison.</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <!-- Highlights en grands chiffres -->
+      {highlights.length > 0 && (
+        <div class="product-highlights-section" data-reveal="up">
+          <div class="grid-highlights">
+            {highlights.map((h) => (
+              <div class="highlight-card">
+                <span class="highlight-value">{h.value}</span>
+                <span class="highlight-label">{h.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Contenu détaillé sous onglets -->
+      <div class="product-details-tabs" data-reveal="up">
+        <Tabs tabs={productTabs} />
+
+        <div class="product-tab-panels" style="margin-top: var(--space-8);">
+          <!-- Panel Description -->
+          <div id="panel-desc" class="tab-panel">
+            <div class="prose">
+              <Content />
+            </div>
+
+            {included.length > 0 && (
+              <div class="included-box">
+                <h3 class="included-title">📦 Inclus dans le coffret de livraison :</h3>
+                <ul class="included-list">
+                  {included.map((item) => (
+                    <li>✓ {item}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {useCases.length > 0 && (
+              <div class="usecases-box">
+                <h3 class="usecases-title">🎯 Cas d'usage principaux sur le terrain :</h3>
+                <div class="usecases-tags">
+                  {useCases.map((uc) => (
+                    <span class="usecase-tag">{uc}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <!-- Panel Spécifications -->
+          {specs && (
+            <div id="panel-specs" class="tab-panel" style="display: none;">
+              <h3 style="font-family: var(--font-serif); font-size: var(--text-xl); margin-bottom: var(--space-4); color: #FFFFFF;">
+                Fiche technique détaillée
+              </h3>
+              <div class="specs-table-wrapper">
+                <table class="specs-table">
+                  <tbody>
+                    {Object.entries(specs).map(([key, val]) => (
+                      <tr>
+                        <th scope="row">{key}</th>
+                        <td>{val}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          <!-- Panel Vidéos -->
+          {youtube.length > 0 && (
+            <div id="panel-videos" class="tab-panel" style="display: none;">
+              <h3 style="font-family: var(--font-serif); font-size: var(--text-xl); margin-bottom: var(--space-4); color: #FFFFFF;">
+                Démonstrations et vidéos
+              </h3>
+              <div style="max-width: 700px;">
+                {youtube.map((ytId) => (
+                  <YouTubeEmbed videoId={ytId} title={`Vidéo ${title}`} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <!-- Panel Livraison & Garantie -->
+          <div id="panel-livraison" class="tab-panel" style="display: none;">
+            <div class="prose">
+              <h2>Livraison et garantie au Bénin</h2>
+              <p>Chaque équipement est inspecté et étalonné dans nos ateliers à Cotonou avant remise à l'acheteur.</p>
+              <ul>
+                <li><strong>Garantie 1 an</strong> pièces et main-d'œuvre avec prêt de matériel d'appoint en cas d'immobilisation.</li>
+                <li><strong>Livraison sécurisée</strong> sous 24/48h au Bénin (Cotonou, Porto-Novo, Parakou...) et sous 5-7 jours en sous-région.</li>
+                <li><strong>Assistance technique WhatsApp 6j/7</strong> pour vos premières sorties terrain.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Produits liés (Souvent achetés avec) -->
+      {relatedProducts.length > 0 && (
+        <div class="product-related-section" data-reveal="up">
+          <SectionHeading
+            eyebrow="COMPLÉMENTAIRES"
+            title="Souvent achetés ensemble"
+            subtitle="Matériels et accessoires fréquemment associés à cet équipement."
+          />
+          <div class="product-grid">
+            {relatedProducts.map((relProd) => (
+              <ProductCard product={relProd} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Barre collante en bas de l'écran (Sticky Mobile Bar) -->
+  <div class="sticky-mobile-bar">
+    <div class="sticky-mobile-bar__price">
+      <span>{formattedPrice}</span>
+    </div>
+    <div class="sticky-mobile-bar__action">
+      <WhatsAppButton
+        message={waMessage}
+        label={devisMode ? "Devis WhatsApp" : "Commander"}
+        variant="whatsapp"
+        size="sm"
+      />
+    </div>
+  </div>
+</Base>
+
+<style>
+.product-page {
+  padding-top: var(--space-8);
+}
+
+.product-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-10);
+  margin-bottom: var(--space-16);
+}
+
+@media (min-width: 902px) {
+  .product-grid-layout {
+    grid-template-columns: 1.1fr 1fr;
+  }
+}
+
+.product-brand {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+  text-transform: uppercase;
+}
+
+.product-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  line-height: var(--leading-tight);
+  margin-block: var(--space-2);
+}
+
+@media (min-width: 768px) {
+  .product-title {
+    font-size: var(--text-4xl);
+  }
+}
+
+.product-badges {
+  margin-bottom: var(--space-6);
+}
+
+.product-price-box {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.product-price-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  color: var(--color-text-faint);
+  letter-spacing: var(--tracking-wider);
+  display: block;
+}
+
+.product-price-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  display: block;
+}
+
+.product-price-val.is-devis {
+  color: #FFFFFF;
+  font-style: italic;
+}
+
+.product-price-sub {
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  margin-top: var(--space-2);
+}
+
+.product-actions-desktop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-8);
+}
+
+.product-features-box {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.product-features-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-3);
+  text-transform: uppercase;
+}
+
+.product-features-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+}
+
+.product-features-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.guide-notice-box {
+  display: flex;
+  gap: var(--space-4);
+  background-color: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.guide-notice-icon {
+  font-size: 24px;
+}
+
+.guide-notice-content strong {
+  color: var(--color-laser);
+  font-size: var(--text-sm);
+  display: block;
+  margin-bottom: 2px;
+}
+
+.guide-notice-content p {
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  line-height: var(--leading-normal);
+}
+
+.product-highlights-section {
+  margin-bottom: var(--space-16);
+}
+
+.grid-highlights {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
+}
+
+.highlight-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.highlight-value {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+}
+
+.highlight-label {
+  display: block;
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  margin-top: var(--space-1);
+}
+
+.product-details-tabs {
+  margin-bottom: var(--space-16);
+}
+
+.included-box, .usecases-box {
+  margin-top: var(--space-8);
+  padding: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.included-title, .usecases-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+}
+
+.included-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+}
+
+.usecases-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.usecase-tag {
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+  color: var(--color-laser);
+  background-color: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+}
+
+.specs-table-wrapper {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.specs-table th, .specs-table td {
+  padding: var(--space-4) var(--space-6);
+  font-size: var(--text-sm);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.specs-table th {
+  text-align: left;
+  font-weight: var(--weight-semibold);
+  color: var(--color-accent);
+  width: 35%;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.specs-table td {
+  color: #FFFFFF;
+}
+
+.sticky-mobile-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  background-color: rgba(18, 23, 34, 0.95);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid var(--color-border-strong);
+  padding: var(--space-3) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 768px) {
+  .sticky-mobile-bar {
+    display: none;
+  }
+}
+
+.sticky-mobile-bar__price {
+  font-family: var(--font-mono);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+}
+</style>
+
+<script>
+function initProductTabs() {
+  const container = document.getElementById("topo-tabs-component");
+  if (!container) return;
+
+  container.addEventListener("tab-changed", (e: any) => {
+    const tabId = e.detail?.tabId;
+    if (!tabId) return;
+
+    const panels = document.querySelectorAll<HTMLElement>(".tab-panel");
+    panels.forEach((p) => {
+      if (p.id === `panel-${tabId}`) {
+        p.style.display = "block";
+      } else {
+        p.style.display = "none";
+      }
+    });
+  });
+}
+
+initProductTabs();
+document.addEventListener("astro:page-load", initProductTabs);
+</script>

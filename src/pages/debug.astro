@@ -1,0 +1,376 @@
+---
+/**
+ * debug.astro — Contrôle du catalogue (PROMPT 0).
+ *
+ * URL : /debug, pour la même raison que /motion (Astro ne route pas
+ * les fichiers src/pages/_*.astro). À supprimer en finitions.
+ *
+ * Page de maintenance interne : elle applique au navigateur les mêmes
+ * règles que scripts/check-content.mjs, mais à partir des données
+ * réellement construites par Astro. Ce que le script ne peut pas voir —
+ * une image qui ne se résout pas, un chemin de collection faux, une
+ * incohérence de rendu — se voit ici.
+ *
+ * Elle est en noindex et ne doit pas être publiée telle quelle en
+ * production.
+ */
+
+import Base from "../layouts/Base.astro";
+import {
+  getVisibleCategories,
+  getVisibleProducts,
+  getVisiblePacks,
+  getCategoryBySlug,
+  getProductBySlug,
+  getPackBySlug,
+  getGuideFor,
+} from "../lib/catalog";
+
+/* ---------- Lecture du catalogue ---------- */
+
+const categories = await getVisibleCategories();
+const products = await getVisibleProducts();
+const packs = await getVisiblePacks();
+
+interface Check {
+  label: string;
+  ok: boolean;
+  detail: string;
+}
+
+const checks: Check[] = [
+  {
+    label: "6 catégories visibles",
+    ok: categories.length === 6,
+    detail: `${categories.length} trouvée(s)`,
+  },
+  {
+    label: "18 produits visibles",
+    ok: products.length === 18,
+    detail: `${products.length} trouvé(s)`,
+  },
+  {
+    label: "3 packs visibles",
+    ok: packs.length === 3,
+    detail: `${packs.length} trouvé(s)`,
+  },
+];
+
+/* Chaque produit doit pointer vers une catégorie existante. */
+const brokenCategoryLinks = products.filter(
+  (product) => !getCategoryBySlug(product.data.category)
+);
+
+/* Chaque pack doit pointer vers des produits existants. */
+const packIdSet = new Set(products.map((product) => product.id));
+const brokenPackRefs = packs.filter((pack) =>
+  pack.data.products.some((ref) => !packIdSet.has(ref))
+);
+
+/* Chaque identifiant YouTube déclaré doit être valide (11 caractères).
+   Le guide n'exige pas une vidéo partout : il en veut sur au moins
+   trois produits. */
+const YOUTUBE_ID = /^[A-Za-z0-9_-]{11}$/;
+const invalidVideoIds = products.flatMap((product) =>
+  (product.data.youtube ?? [])
+    .filter((id) => !YOUTUBE_ID.test(id))
+    .map((id) => `${product.id}:${id}`)
+);
+const withVideo = products.filter((product) => (product.data.youtube ?? []).length > 0);
+
+/* Les produits liés doivent exister, et le guide en veut sur au moins
+   cinq références — pas sur les dix-huit. */
+const productIdSet = new Set(products.map((product) => product.id));
+const invalidRelated = products.flatMap((product) =>
+  (product.data.related ?? [])
+    .filter((ref) => !productIdSet.has(ref))
+    .map((ref) => `${product.id} → ${ref}`)
+);
+const withRelated = products.filter((product) => (product.data.related ?? []).length > 0);
+
+const featured = products.filter((product) => product.data.featured === true);
+const withPrice = products.filter((product) => product.data.price !== undefined);
+const zeroPrices = products.filter((product) => product.data.price === 0);
+
+/* Un produit qui déclare un guide doit pointer vers un guide réel.
+   getGuideFor est asynchrone : on les résout tous avant de juger. */
+const guideChecks = await Promise.all(
+  products
+    .filter((product) => product.data.guide)
+    .map(async (product) => ({
+      id: product.id,
+      found: Boolean(await getGuideFor(product.id)),
+    }))
+);
+
+const missingGuides = guideChecks.filter((check) => !check.found);
+const guideCount = new Set(
+  products.map((product) => product.data.guide ?? "").filter(Boolean)
+).size;
+
+/* ---------- Ligne de tableau ---------- */
+
+const rows: Check[] = [
+  ...checks,
+  {
+    label: "Chaque produit pointe vers une catégorie existante",
+    ok: brokenCategoryLinks.length === 0,
+    detail:
+      brokenCategoryLinks.length === 0
+        ? "toutes les références résolues"
+        : brokenCategoryLinks.map((p) => p.id).join(", "),
+  },
+  {
+    label: "Chaque pack pointe vers des produits existants",
+    ok: brokenPackRefs.length === 0,
+    detail:
+      brokenPackRefs.length === 0
+        ? "toutes les références résolues"
+        : brokenPackRefs.map((p) => p.id).join(", "),
+  },
+  {
+    label: "Identifiants YouTube déclarés tous valides (11 caractères)",
+    ok: invalidVideoIds.length === 0,
+    detail:
+      invalidVideoIds.length === 0
+        ? `${withVideo.length} produit(s) avec vidéo`
+        : invalidVideoIds.join(", "),
+  },
+  {
+    label: "Aucune référence croisée introuvable",
+    ok: invalidRelated.length === 0,
+    detail:
+      invalidRelated.length === 0
+        ? `${withRelated.length} produit(s) avec produits liés`
+        : invalidRelated.join(", "),
+  },
+  {
+    label: "Aucun prix à zéro",
+    ok: zeroPrices.length === 0,
+    detail: zeroPrices.length === 0 ? "aucun" : zeroPrices.map((p) => p.id).join(", "),
+  },
+  {
+    label: "Au moins 5 produits définissent « related »",
+    ok: withRelated.length >= 5,
+    detail: `${withRelated.length}/${products.length}`,
+  },
+  {
+    label: "Au moins 4 produits sont mis en avant",
+    ok: featured.length >= 4,
+    detail: `${featured.length} en avant`,
+  },
+  {
+    label: "Au moins 3 produits ont une vidéo",
+    ok: withVideo.length >= 3,
+    detail: `${withVideo.length} avec vidéo`,
+  },
+  {
+    label: "Chaque produit déclarant un guide a son guide",
+    ok: missingGuides.length === 0,
+    detail:
+      missingGuides.length === 0
+        ? `${guideCount} guide(s) résolu(s)`
+        : missingGuides.map((check) => check.id).join(", "),
+  },
+];
+
+const failed = rows.filter((row) => !row.ok);
+---
+
+<Base
+  title="Contrôle du catalogue"
+  description="Page interne : vérification du catalogue, des prix, des références croisées et des vidéos."
+  noindex
+>
+  <section class="section">
+    <div class="container">
+      <header class="debug-head" data-reveal="up">
+        <p class="eyebrow">Contrôle interne</p>
+        <h1>Catalogue : {failed.length === 0 ? "tout est conforme" : `${failed.length} point(s) à corriger`}</h1>
+        <p class="debug-head__note">
+          Cette page lit le catalogue construit par Astro. Pour la même
+          vérification hors navigateur, lancer <code>npm run check</code>.
+        </p>
+      </header>
+
+      <ol class="debug-list">
+        {
+          rows.map((row) => (
+            <li class:list={["debug-row", row.ok ? "is-ok" : "is-ko"]} data-reveal="up">
+              <span class="debug-row__state" aria-hidden="true">
+                {row.ok ? "✓" : "✕"}
+              </span>
+              <span class="debug-row__label">
+                {row.label}
+                <span class="sr-only">{row.ok ? " : conforme" : " : à corriger"}</span>
+              </span>
+              <span class="debug-row__detail mono">{row.detail}</span>
+            </li>
+          ))
+        }
+      </ol>
+
+      <h2 class="debug-sub" data-reveal="up">Répartition</h2>
+
+      <dl class="debug-stats" data-stagger>
+        <div class="debug-stat">
+          <dt>Avec prix</dt>
+          <dd>{withPrice.length}</dd>
+        </div>
+        <div class="debug-stat">
+          <dt>Sur devis</dt>
+          <dd>{products.length - withPrice.length}</dd>
+        </div>
+        <div class="debug-stat">
+          <dt>En boutique</dt>
+          <dd>{products.filter((p) => p.data.availability === "en-boutique").length}</dd>
+        </div>
+        <div class="debug-stat">
+          <dt>Sur commande</dt>
+          <dd>{products.filter((p) => p.data.availability === "sur-commande").length}</dd>
+        </div>
+      </dl>
+
+      <h2 class="debug-sub" data-reveal="up">Résolution des liens</h2>
+
+      <ul class="debug-links">
+        {
+          categories.map((category) => (
+            <li data-reveal="up">
+              <span class="mono">{category.id}</span> —{" "}
+              {getCategoryBySlug(category.id) ? "résout" : "introuvable"}
+            </li>
+          ))
+        }
+        {
+          packs.map((pack) => (
+            <li data-reveal="up">
+              <span class="mono">/pack/{pack.id}</span> —{" "}
+              {getPackBySlug(pack.id) ? "résout" : "introuvable"}
+            </li>
+          ))
+        }
+        {
+          products.slice(0, 6).map((product) => (
+            <li data-reveal="up">
+              <span class="mono">/produit/{product.id}</span> —{" "}
+              {getProductBySlug(product.id) ? "résout" : "introuvable"}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .debug-head {
+    max-width: 60ch;
+    margin-bottom: var(--space-8);
+  }
+
+  .debug-head__note {
+    margin-top: var(--space-3);
+    color: var(--color-text-muted);
+  }
+
+  .debug-head__note code,
+  .debug-links .mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+  }
+
+  .debug-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .debug-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    border: 1px solid var(--color-border);
+    border-left-width: 4px;
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+
+  .debug-row.is-ok {
+    border-left-color: var(--color-success);
+  }
+
+  .debug-row.is-ko {
+    border-left-color: var(--color-danger);
+  }
+
+  .debug-row__state {
+    font-weight: var(--weight-bold);
+  }
+
+  .debug-row.is-ok .debug-row__state {
+    color: var(--color-success);
+  }
+
+  .debug-row.is-ko .debug-row__state {
+    color: var(--color-danger);
+  }
+
+  .debug-row__label {
+    flex: 1;
+  }
+
+  .debug-row__detail {
+    color: var(--color-text-muted);
+  }
+
+  .debug-sub {
+    margin-top: var(--space-8);
+    margin-bottom: var(--space-4);
+    font-size: var(--text-xl);
+  }
+
+  .debug-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    gap: var(--space-3);
+    margin: 0;
+  }
+
+  .debug-stat {
+    padding: var(--space-4);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background-color: var(--color-surface);
+  }
+
+  .debug-stat dt {
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-widest);
+    color: var(--color-text-faint);
+  }
+
+  .debug-stat dd {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-numeric);
+    font-size: var(--text-2xl);
+    font-weight: var(--weight-bold);
+    color: var(--color-accent);
+  }
+
+  .debug-links {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+</style>

@@ -1,0 +1,151 @@
+---
+/**
+ * AddToCart.astro — Bouton d'ajout à la liste de commande.
+ *
+ * Aucune commande n'est enregistrée ici : le panier ne prépare qu'une
+ * liste, la finalisation se fait sur WhatsApp (guide §6 bis).
+ *
+ * Le bouton émet `panier-ajout` ; src/scripts/motion.ts en fait le vol
+ * de la vignette vers l'icône du panier, le rebond du compteur et le
+ * toast. Le composant ne connaît donc pas l'animation.
+ */
+
+interface Props {
+  /** Slug du produit ou du pack. */
+  slug: string;
+  /** Titre affiché dans le toast après l'ajout. */
+  title: string;
+  /** Type d'article. */
+  type?: "produit" | "pack";
+  /** Libellé du bouton. */
+  label?: string;
+  /** Taille. */
+  size?: "sm" | "md" | "lg";
+  /** Variant visuel. */
+  variant?: "primary" | "outline" | "ghost";
+  /** Occupe toute la largeur. */
+  full?: boolean;
+  /** Icône de panier. */
+  showIcon?: boolean;
+  /** Classe additionnelle. */
+  class?: string;
+}
+
+const {
+  slug,
+  title,
+  type = "produit",
+  label = "Ajouter au panier",
+  size = "md",
+  variant = "outline",
+  full = false,
+  showIcon = true,
+  class: extraClass = "",
+} = Astro.props;
+
+const sizeClass = size === "sm" ? "btn--sm" : size === "lg" ? "btn--lg" : "";
+const variantClass =
+  variant === "primary" ? "btn--primary" : variant === "ghost" ? "btn--ghost" : "btn--outline";
+const fullClass = full ? "btn--full" : "";
+---
+
+<button
+  type="button"
+  class={`btn ${variantClass} ${sizeClass} ${fullClass} add-to-cart-btn ${extraClass}`.trim()}
+  data-slug={slug}
+  data-type={type}
+  data-title={title}
+  aria-label={`${label} — ${title}`}
+>
+  {showIcon && (
+    <svg
+      class="add-to-cart-btn__icon"
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z" />
+      <path d="M3 6h18" />
+      <path d="M16 10a4 4 0 0 1-8 0" />
+    </svg>
+  )}
+
+  <span class="add-to-cart-btn__label">{label}</span>
+</button>
+
+<style>
+  .add-to-cart-btn.is-added {
+    background-color: var(--color-success) !important;
+    color: #ffffff !important;
+    border-color: var(--color-success) !important;
+  }
+
+  .add-to-cart-btn.is-added .add-to-cart-btn__icon {
+    animation: none;
+  }
+</style>
+
+<script>
+  import { addToCart } from "../lib/cart";
+
+  function initAddToCartButtons(): void {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".add-to-cart-btn");
+
+    buttons.forEach((button) => {
+      // Évite les doubles écouteurs : le script bundlé ne s'exécute
+      // qu'une fois, mais un élément peut survivre à une navigation.
+      if (button.dataset.initialized === "true") return;
+      button.dataset.initialized = "true";
+
+      button.addEventListener("click", (event) => {
+        // Le bouton est posé au-dessus du lien qui recouvre la carte :
+        // sans cela, le clic ouvrirait la fiche.
+        event.stopPropagation();
+        event.preventDefault();
+
+        const slug = button.dataset.slug;
+        const type = (button.dataset.type as "produit" | "pack") || "produit";
+        const title = button.dataset.title || slug || "";
+        if (!slug) return;
+
+        const result = addToCart(slug, type, 1);
+
+        if (result.isLimitReached) {
+          // Pas de window.alert : le message doit être annoncé à la
+          // même région aria-live que les ajouts, et ne pas bloquer.
+          window.dispatchEvent(new CustomEvent("panier-limite"));
+          return;
+        }
+
+        if (!result.success) return;
+
+        const label = button.querySelector(".add-to-cart-btn__label");
+        const initial = label?.textContent ?? label;
+
+        button.classList.add("is-added");
+        if (label) label.textContent = "Ajouté";
+
+        window.setTimeout(() => {
+          button.classList.remove("is-added");
+          if (label && initial !== null) label.textContent = initial;
+        }, 1800);
+
+        // Le module d'animation se charge de la suite : vol vers le
+        // panier, rebond du compteur, toast.
+        window.dispatchEvent(
+          new CustomEvent("panier-ajout", { detail: { source: button, title } })
+        );
+      });
+    });
+  }
+
+  initAddToCartButtons();
+  document.addEventListener("astro:page-load", initAddToCartButtons);
+</script>

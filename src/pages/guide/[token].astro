@@ -1,0 +1,228 @@
+---
+/**
+ * src/pages/guide/[token].astro — Fiche Guide Secret d'Utilisation.
+ * Conforme à la spec PROMPT 6 & §6 ter du guide.
+ */
+
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import Contours from "../../components/Contours.astro";
+import Crosshair from "../../components/Crosshair.astro";
+import YouTubeEmbed from "../../components/YouTubeEmbed.astro";
+import ScrollProgress from "../../components/ScrollProgress.astro";
+
+import { site } from "../../config/site";
+import { getProductBySlug } from "../../lib/catalog";
+import { waLink } from "../../lib/whatsapp";
+
+export async function getStaticPaths() {
+  const guides = await getCollection("guides");
+  return guides.map((guide) => ({
+    params: { token: guide.data.token },
+    props: { guide },
+  }));
+}
+
+const { guide } = Astro.props;
+const { product: productSlug, title, youtube = [] } = guide.data;
+
+const { Content } = await render(guide);
+const productObj = await getProductBySlug(productSlug);
+---
+
+<Base
+  title={title}
+  description="Guide réservé d'utilisation et d'étalonnage pour le matériel topographique."
+  noindex={true}
+>
+  <ScrollProgress />
+  <Crosshair />
+
+  <section class="section guide-secret-page">
+    <div class="container container--narrow">
+      <!-- Banner avertissement confidentiel -->
+      <div class="secret-banner" data-reveal="down">
+        <span class="secret-banner__icon">🔒</span>
+        <div class="secret-banner__text">
+          <strong>DOCUMENT CONFIDENTIEL CLENT</strong>
+          <p>Ce guide secret d'étalonnage est réservé aux acquéreurs certifiés. Ne pas partager ce lien d'accès.</p>
+        </div>
+      </div>
+
+      <header class="guide-header" data-reveal="up">
+        <span class="guide-eyebrow">NOTICE D'ÉTALONNAGE & MANIEMENT TERRAIN</span>
+        <h1 class="guide-title">{title}</h1>
+        
+        {productObj && (
+          <div class="guide-product-ref">
+            <span>Matériel concerné :</span>
+            <a href={`/produit/${productObj.id}`} class="product-ref-link">
+              📦 {productObj.data.title}
+            </a>
+          </div>
+        )}
+      </header>
+
+      <!-- Intégration Vidéos d'étalonnage -->
+      {youtube.length > 0 && (
+        <div class="guide-videos-box" data-reveal="up">
+          <h2 class="guide-section-title">🎥 Tutoriel Vidéo de Prise en Main</h2>
+          <div class="guide-videos-grid">
+            {youtube.map((videoId) => (
+              <YouTubeEmbed id={videoId} title={`Tutoriel vidéo : ${title}`} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- Contenu Markdown du Guide -->
+      <article class="prose guide-prose" data-reveal="up">
+        <Content />
+      </article>
+
+      <!-- Assistance technique WhatsApp -->
+      <div class="guide-support-box" data-reveal="up">
+        <div class="support-box__icon">🎧</div>
+        <div class="support-box__content">
+          <h3>Besoin d'assistance pendant votre étalonnage ?</h3>
+          <p>Notre ingénieur support répond directement à vos interrogations techniques sur le terrain.</p>
+          <a
+            href={waLink(`Bonjour, j'ai une question sur le guide d'étalonnage : ${title}`)}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn btn--accent btn--md"
+          >
+            Contacter le support atelier sur WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+.container--narrow {
+  max-width: 840px;
+}
+
+.secret-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background-color: rgba(255, 107, 0, 0.1);
+  border: 1px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  margin-block: var(--space-4) var(--space-8);
+}
+
+.secret-banner__icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.secret-banner__text strong {
+  display: block;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-wider);
+}
+
+.secret-banner__text p {
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  margin: 0;
+}
+
+.guide-header {
+  margin-bottom: var(--space-8);
+}
+
+.guide-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-cyan);
+  letter-spacing: var(--tracking-widest);
+}
+
+.guide-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-block: var(--space-2) var(--space-4);
+}
+
+.guide-product-ref {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-text-dim);
+}
+
+.product-ref-link {
+  color: #FFFFFF;
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+}
+
+.product-ref-link:hover {
+  color: var(--color-accent);
+}
+
+.guide-section-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+}
+
+.guide-videos-box {
+  margin-bottom: var(--space-8);
+}
+
+.guide-prose {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  margin-bottom: var(--space-8);
+}
+
+.guide-support-box {
+  display: flex;
+  gap: var(--space-5);
+  align-items: center;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+}
+
+@media (max-width: 640px) {
+  .guide-support-box {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.support-box__icon {
+  font-size: 40px;
+}
+
+.support-box__content h3 {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  color: #FFFFFF;
+  margin-bottom: var(--space-1);
+}
+
+.support-box__content p {
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+  margin-bottom: var(--space-4);
+}
+</style>

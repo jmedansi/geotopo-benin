@@ -1,0 +1,287 @@
+---
+/**
+ * PackCard.astro — Carte Pack d'équipements Pro Max.
+ */
+
+import { Image } from "astro:assets";
+import type { PackEntry } from "../lib/catalog";
+import { formatPrice } from "../lib/price";
+
+interface Props {
+  pack: PackEntry;
+  productNames?: string[];
+  loading?: "eager" | "lazy";
+}
+
+const { pack, productNames = [], loading = "lazy" } = Astro.props;
+const { title, cover, availability, leadTime, price, summary } = pack.data;
+const slug = pack.id;
+const formattedPrice = formatPrice(price);
+const isBoutique = availability === "en-boutique";
+---
+
+<article class="pack-card" data-tilt data-reveal="up">
+  <div class="pack-card__media">
+    <Image
+      src={cover}
+      alt={title}
+      width={600}
+      height={450}
+      loading={loading}
+      class="pack-card__image"
+    />
+    <div class="pack-card__badge-wrapper">
+      <span class="badge badge--pack-label">PACK PRO CLÉ EN MAIN</span>
+      {isBoutique ? (
+        <span class="badge badge--boutique">En boutique</span>
+      ) : (
+        <span class="badge badge--commande">Sur commande {leadTime ? `(${leadTime})` : ""}</span>
+      )}
+    </div>
+  </div>
+
+  <div class="pack-card__body">
+    <h3 class="pack-card__title">
+      <a href={`/pack/${slug}`} class="pack-card__link">
+        {title}
+      </a>
+    </h3>
+
+    <p class="pack-card__summary">{summary}</p>
+
+    {productNames.length > 0 && (
+      <div class="pack-card__includes">
+        <span class="pack-card__includes-title">Matériel inclus dans l'ensemble :</span>
+        <ul class="pack-card__includes-list">
+          {productNames.map((name) => (
+            <li>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>{name}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    <div class="pack-card__footer">
+      <div class="pack-card__price-wrapper">
+        <span class="pack-card__price-label">Tarif de l'ensemble</span>
+        <span class={`pack-card__price ${price === undefined ? "is-devis" : ""}`}>
+          {formattedPrice}
+        </span>
+      </div>
+
+      <div class="pack-card__actions">
+        <button
+          type="button"
+          class="btn btn--primary btn--sm pack-card__add-btn"
+          data-slug={slug}
+          data-type="pack"
+        >
+          Ajouter le pack
+        </button>
+      </div>
+    </div>
+  </div>
+</article>
+
+<style>
+.pack-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  will-change: transform;
+  transition: all var(--transition-base);
+}
+
+.pack-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-glow), var(--shadow-lg);
+}
+
+.pack-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: var(--color-bg-alt);
+}
+
+.pack-card__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-slow);
+}
+
+.pack-card:hover .pack-card__image {
+  transform: scale(1.06);
+}
+
+.pack-card__badge-wrapper {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  z-index: 2;
+}
+
+.badge--pack-label {
+  background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-dark) 100%);
+  color: #FFFFFF;
+  box-shadow: 0 2px 8px rgba(255, 107, 0, 0.4);
+}
+
+.pack-card__body {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  padding: var(--space-6);
+}
+
+.pack-card__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  line-height: var(--leading-tight);
+  margin-bottom: var(--space-2);
+}
+
+.pack-card__link {
+  color: #FFFFFF;
+  text-decoration: none;
+}
+
+.pack-card__link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.pack-card:hover .pack-card__link {
+  color: var(--color-accent);
+}
+
+.pack-card__summary {
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-4);
+  line-height: var(--leading-relaxed);
+}
+
+.pack-card__includes {
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--color-border);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-4);
+}
+
+.pack-card__includes-title {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  color: var(--color-text-faint);
+  margin-bottom: var(--space-2);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.pack-card__includes-list {
+  font-size: var(--text-xs);
+  color: var(--color-text);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pack-card__includes-list li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pack-card__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--color-border);
+  margin-top: auto;
+}
+
+.pack-card__price-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.pack-card__price-label {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  color: var(--color-text-faint);
+}
+
+.pack-card__price {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+}
+
+.pack-card__price.is-devis {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-weight: var(--weight-semibold);
+}
+
+.pack-card__actions {
+  position: relative;
+  z-index: 2;
+}
+</style>
+
+<script>
+import { addToCart } from "../lib/cart";
+
+function initPackCardCart() {
+  const addBtns = document.querySelectorAll<HTMLButtonElement>(".pack-card__add-btn");
+
+  addBtns.forEach((btn) => {
+    if (btn.dataset.packBtnInit) return;
+    btn.dataset.packBtnInit = "true";
+
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const slug = btn.dataset.slug;
+      if (!slug) return;
+
+      const result = addToCart(slug, "pack", 1);
+      if (result.success) {
+        const orig = btn.textContent;
+        btn.textContent = "Pack Ajouté ! ✓";
+        btn.style.backgroundColor = "var(--color-badge-boutique-text)";
+        setTimeout(() => {
+          btn.textContent = orig;
+          btn.style.backgroundColor = "";
+        }, 1800);
+      }
+    });
+  });
+}
+
+initPackCardCart();
+document.addEventListener("astro:page-load", initPackCardCart);
+</script>

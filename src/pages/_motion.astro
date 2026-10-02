@@ -1,0 +1,125 @@
+---
+/**
+ * _motion.astro — Page de démonstration de tous les composants d'animation.
+ * À utiliser pour vérifier le bon fonctionnement du système motion.ts.
+ */
+
+import Base from "../layouts/Base.astro";
+import Contours from "../components/Contours.astro";
+import Crosshair from "../components/Crosshair.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import Counter from "../components/Counter.astro";
+import Marquee from "../components/Marquee.astro";
+import MagneticButton from "../components/MagneticButton.astro";
+import ScrollProgress from "../components/ScrollProgress.astro";
+import Accordion from "../components/Accordion.astro";
+import Tabs from "../components/Tabs.astro";
+import Lightbox from "../components/Lightbox.astro";
+import ProductCard from "../components/ProductCard.astro";
+import CategoryCard from "../components/CategoryCard.astro";
+import PackCard from "../components/PackCard.astro";
+import { getProducts, getCategories, getPacks } from "../lib/catalog";
+
+const products = await getProducts();
+const categories = await getCategories();
+const packs = await getPacks();
+
+const sampleProduct = products[0];
+const sampleCategory = categories[0];
+const samplePack = packs[0];
+
+const faqItems = [
+  { q: "Quels sont les délais de livraison au Bénin ?", a: "Les produits en boutique sont livrés sous 24 à 48h. Pour les commandes sur mesure importées, comptez 15 à 25 jours." },
+  { q: "Comment s'effectue le paiement ?", a: "Aucun paiement en ligne. La négociation et le règlement s'effectuent de gré à gré lors de la confirmation sur WhatsApp." },
+];
+
+const tabItems = [
+  { id: "stations", label: "Stations Totales" },
+  { id: "gnss", label: "Récepteurs GNSS" },
+  { id: "niveaux", label: "Niveaux Optiques" },
+];
+---
+
+<Base title="Démo Composants Motion" description="Page de test du système d'animation et des composants motion.">
+  <ScrollProgress />
+  <Crosshair />
+  <Lightbox />
+
+  <!-- Section Hero avec Contours et Parallaxe -->
+  <section class="section section--alt" style="position: relative; overflow: hidden;" data-crosshair>
+    <Contours variant="hero" draw={true} />
+    <div class="container" style="position: relative; z-index: 2; padding-block: 4rem;">
+      <SectionHeading
+        eyebrow="Démo Motion System"
+        title="Système d'Animation & Composants GéoTopo"
+        subtitle="Démonstration interactive de tous les attributs data-* et des composants visuels."
+      />
+
+      <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
+        <MagneticButton>
+          <a href="/boutique" class="btn btn--primary btn--lg">
+            Bouton Magnétique Principal
+          </a>
+        </MagneticButton>
+        <MagneticButton>
+          <a href="/sur-mesure" class="btn btn--outline btn--lg">
+            Bouton Magnétique Outline
+          </a>
+        </MagneticButton>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Compteurs Animés -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading eyebrow="data-counter" title="Compteurs Animés au Scroll" />
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+        <Counter value={18} suffix=" Ref" label="Produits en catalogue" />
+        <Counter value={6} label="Catégories spécialisées" />
+        <Counter value={15} suffix=" Jours" label="Délai moyen d'importation" />
+        <Counter value={100} suffix="%" label="Matériel contrôlé à Cotonou" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Marquee -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading eyebrow="data-marquee" title="Bande de Défilement Infini" />
+    </div>
+    <Marquee speed={20}>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-accent);">FOIF</span>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-text);">SOUTH</span>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-accent);">LEICA GEOSYSTEMS</span>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-text);">CHCNAV</span>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-accent);">SOKKIA</span>
+      <span style="font-size: var(--text-2xl); font-weight: bold; color: var(--color-text);">BOSCH PROFESSIONAL</span>
+    </Marquee>
+  </section>
+
+  <!-- Section Cartes (Tilt 3D) -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading eyebrow="data-tilt & data-reveal" title="Cartes Produits & Packs avec Tilt 3D" />
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+        {sampleProduct && <ProductCard product={sampleProduct} />}
+        {sampleCategory && <CategoryCard category={sampleCategory} count={3} />}
+        {samplePack && <PackCard pack={samplePack} productNames={["Station ST-M5", "Trépied TA-160"]} />}
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Onglets & Accordéon -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading eyebrow="UI Interactifs" title="Onglets et Accordéon FAQ" />
+      <div style="max-width: 800px; margin-inline: auto;">
+        <Tabs tabs={tabItems} />
+        <div style="margin-top: 3rem;">
+          <Accordion items={faqItems} />
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,413 @@
+---
+/**
+ * Header.astro — Navigation flottante ultra-lisible (Contraste Élevé).
+ */
+
+import { site } from "../config/site";
+
+const currentPath = Astro.url.pathname;
+
+function isActive(href: string): boolean {
+  if (href === "/") return currentPath === "/";
+  return currentPath.startsWith(href);
+}
+---
+
+<header class="site-header" id="site-header" role="banner" transition:persist>
+  <div class="container site-header__inner">
+
+    <!-- Logo / Marque Pro -->
+    <a href="/" class="site-header__logo" aria-label={`${site.name} — Accueil`}>
+      <div class="site-header__logo-icon-wrapper">
+        <svg
+          class="site-header__logo-icon"
+          width="32"
+          height="32"
+          viewBox="0 0 36 36"
+          fill="none"
+          aria-hidden="true"
+        >
+          <circle cx="18" cy="18" r="15" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"/>
+          <circle cx="18" cy="18" r="9" stroke="var(--color-laser)" stroke-width="1.5"/>
+          <line x1="2" y1="18" x2="12" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="24" y1="18" x2="34" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18" y1="2" x2="18" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <line x1="18" y1="24" x2="18" y2="34" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="18" cy="18" r="3" fill="var(--color-accent)"/>
+        </svg>
+      </div>
+      <div class="site-header__logo-text">
+        <span class="site-header__logo-name">{site.nameShort}</span>
+        <span class="site-header__logo-tag">BÉNIN & TOPOGRAPHIE</span>
+      </div>
+    </a>
+
+    <!-- Navigation Desktop -->
+    <nav class="site-header__nav" aria-label="Navigation principale">
+      <ul class="site-header__nav-list" role="list">
+        {site.nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class={`site-header__nav-link ${isActive(item.href) ? "is-active" : ""}`}
+              aria-current={isActive(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <!-- Actions : Panier + Burger -->
+    <div class="site-header__actions">
+      <!-- Icône Panier -->
+      <a
+        href="/panier"
+        class="site-header__cart"
+        id="header-cart-link"
+        aria-label="Voir le panier (0 article)"
+        title="Panier"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path d="M16 10a4 4 0 01-8 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="site-header__cart-count" id="header-cart-count" aria-hidden="true">0</span>
+      </a>
+
+      <!-- Burger Mobile -->
+      <button
+        class="site-header__burger"
+        id="burger-btn"
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+        aria-label="Ouvrir le menu"
+        type="button"
+      >
+        <span class="site-header__burger-line"></span>
+        <span class="site-header__burger-line"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Menu Mobile Glass Drawer -->
+  <div
+    class="mobile-menu"
+    id="menu-mobile"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menu mobile"
+    hidden
+  >
+    <nav aria-label="Navigation mobile">
+      <ul class="mobile-menu__list" role="list">
+        {site.nav.map((item) => (
+          <li>
+            <a
+              href={item.href}
+              class={`mobile-menu__link ${isActive(item.href) ? "is-active" : ""}`}
+              aria-current={isActive(item.href) ? "page" : undefined}
+            >
+              {item.label}
+            </a>
+          </li>
+        ))}
+        <li>
+          <a href="/panier" class="mobile-menu__link">
+            Panier client
+          </a>
+        </li>
+      </ul>
+    </nav>
+  </div>
+
+  <div class="mobile-overlay" id="mobile-overlay" aria-hidden="true"></div>
+</header>
+
+<a href="#contenu-principal" class="skip-link">Aller au contenu principal</a>
+
+<style>
+.site-header {
+  position: fixed;
+  top: var(--space-3);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--container-max), 94vw);
+  z-index: 1000;
+  height: var(--header-height);
+  background-color: #121722;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  transition: all var(--transition-base);
+}
+
+.site-header.is-scrolled {
+  top: var(--space-2);
+  background-color: #0B0E14;
+  border-color: rgba(255, 107, 0, 0.4);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8);
+}
+
+.site-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: 100%;
+  padding-inline: var(--container-padding);
+}
+
+.site-header__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  text-decoration: none;
+  color: #FFFFFF;
+}
+
+.site-header__logo-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background-color: rgba(255, 107, 0, 0.15);
+  border: 1px solid rgba(255, 107, 0, 0.4);
+  border-radius: var(--radius-md);
+  color: var(--color-accent);
+}
+
+.site-header__logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.site-header__logo-name {
+  font-family: var(--font-serif);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  line-height: 1.1;
+}
+
+.site-header__logo-tag {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: var(--tracking-widest);
+  color: var(--color-accent);
+  font-weight: var(--weight-bold);
+}
+
+/* Navigation Desktop */
+.site-header__nav {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .site-header__nav {
+    display: block;
+  }
+}
+
+.site-header__nav-list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 4px;
+  border-radius: var(--radius-full);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.site-header__nav-link {
+  display: block;
+  padding: 8px 18px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: #E2E8F0;
+  border-radius: var(--radius-full);
+  transition: all var(--transition-fast);
+}
+
+.site-header__nav-link:hover {
+  color: #FFFFFF;
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.site-header__nav-link.is-active {
+  color: #FFFFFF;
+  background-color: #FF6B00;
+  font-weight: var(--weight-bold);
+  box-shadow: 0 4px 12px rgba(255, 107, 0, 0.4);
+}
+
+/* Actions */
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.site-header__cart {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+  transition: all var(--transition-fast);
+}
+
+.site-header__cart:hover {
+  border-color: #FF6B00;
+  color: #FF6B00;
+  box-shadow: 0 0 15px rgba(255, 107, 0, 0.4);
+}
+
+.site-header__cart-count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background-color: #FF6B00;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: var(--weight-bold);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all var(--transition-fast);
+  box-shadow: 0 0 8px #FF6B00;
+}
+
+.site-header__cart-count.is-visible {
+  opacity: 1;
+}
+
+/* Burger */
+.site-header__burger {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
+}
+
+@media (min-width: 768px) {
+  .site-header__burger {
+    display: none;
+  }
+}
+
+.site-header__burger-line {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: currentColor;
+  border-radius: var(--radius-full);
+}
+
+.mobile-menu {
+  position: fixed;
+  top: calc(var(--header-height) + 16px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-10px);
+  width: min(var(--container-max), 94vw);
+  background-color: #121722;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8);
+  opacity: 0;
+  pointer-events: none;
+  transition: all var(--transition-base);
+}
+
+.mobile-menu:not([hidden]) {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.mobile-menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-menu__link {
+  display: block;
+  padding: var(--space-3) var(--space-4);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-medium);
+  color: #E2E8F0;
+  border-radius: var(--radius-md);
+}
+
+.mobile-menu__link.is-active,
+.mobile-menu__link:hover {
+  color: #FFFFFF;
+  background-color: #FF6B00;
+}
+
+.skip-link {
+  position: fixed;
+  top: var(--space-4);
+  left: var(--space-4);
+  z-index: 99999;
+  padding: var(--space-3) var(--space-6);
+  background-color: #FF6B00;
+  color: #FFFFFF;
+  font-weight: var(--weight-bold);
+  border-radius: var(--radius-md);
+  transform: translateY(-200%);
+  transition: transform var(--transition-fast);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+</style>
+
+<script>
+  import { getCartCount } from "../lib/cart";
+
+  function updateHeaderCartCount() {
+    const countEl = document.getElementById("header-cart-count");
+    const linkEl = document.getElementById("header-cart-link");
+    if (!countEl) return;
+    const count = getCartCount();
+    countEl.textContent = String(count);
+    if (count > 0) {
+      countEl.classList.add("is-visible");
+    } else {
+      countEl.classList.remove("is-visible");
+    }
+    if (linkEl) {
+      linkEl.setAttribute("aria-label", `Voir le panier (${count} article${count > 1 ? "s" : ""})`);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", updateHeaderCartCount);
+  document.addEventListener("astro:page-load", updateHeaderCartCount);
+  window.addEventListener("panier-mis-a-jour", updateHeaderCartCount);
+</script>
+

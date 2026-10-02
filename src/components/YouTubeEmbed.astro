@@ -1,0 +1,135 @@
+---
+/**
+ * YouTubeEmbed.astro — Façade YouTube ultra-performante et confidentielle.
+ *
+ * RÈGLE STRICTE DU GUIDE (§7) :
+ * Aucun iframe au chargement de la page.
+ * Affiche une vignette (https://img.youtube.com/vi/<id>/hqdefault.jpg) + bouton play.
+ * Charge l'iframe 'youtube-nocookie.com' uniquement lors du clic utilisateur.
+ */
+
+interface Props {
+  /** Identifiant de la vidéo YouTube (ex. "dQw4w9WgXcQ") */
+  videoId: string;
+  /** Titre accessible de la vidéo */
+  title?: string;
+}
+
+const { videoId, title = "Vidéo de présentation du produit" } = Astro.props;
+const posterUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+---
+
+<div class="youtube-facade" data-video-id={videoId} data-title={title}>
+  <!-- Image de couverture YouTube -->
+  <img
+    src={posterUrl}
+    alt={title}
+    loading="lazy"
+    width="800"
+    height="450"
+    class="youtube-facade__poster"
+  />
+
+  <!-- Bouton Play rouge YouTube officiel stylisé -->
+  <button
+    type="button"
+    class="youtube-facade__play-btn"
+    aria-label={`Lire la vidéo : ${title}`}
+  >
+    <svg width="68" height="48" viewBox="0 0 68 48" aria-hidden="true" focusable="false">
+      <path
+        d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55c-2.93.78-4.63 3.26-5.42 6.19C.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z"
+        fill="#FF0000"
+      />
+      <path d="M45 24L27 14v20z" fill="#FFFFFF" />
+    </svg>
+  </button>
+</div>
+
+<style>
+.youtube-facade {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background-color: #000000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.youtube-facade__poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.9;
+  transition: opacity var(--transition-fast), transform var(--transition-slow);
+}
+
+.youtube-facade:hover .youtube-facade__poster {
+  opacity: 1;
+  transform: scale(1.02);
+}
+
+.youtube-facade__play-btn {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform var(--transition-fast), filter var(--transition-fast);
+}
+
+.youtube-facade:hover .youtube-facade__play-btn {
+  transform: translate(-50%, -50%) scale(1.1);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.5));
+}
+
+.youtube-facade iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+</style>
+
+<script>
+function initYouTubeFacades() {
+  const facades = document.querySelectorAll<HTMLElement>(".youtube-facade");
+  
+  facades.forEach((facade) => {
+    if (facade.dataset.initialized) return;
+    facade.dataset.initialized = "true";
+
+    const playBtn = facade.querySelector("button");
+    if (!playBtn) return;
+
+    playBtn.addEventListener("click", () => {
+      const videoId = facade.dataset.videoId;
+      const title   = facade.dataset.title || "Vidéo YouTube";
+      if (!videoId) return;
+
+      // Création dynamique de l'iframe youtube-nocookie
+      const iframe = document.createElement("iframe");
+      iframe.setAttribute(
+        "src",
+        `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`
+      );
+      iframe.setAttribute("title", title);
+      iframe.setAttribute(
+        "allow",
+        "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      );
+      iframe.setAttribute("allowfullscreen", "true");
+
+      // Remplacement propre du contenu de la façade
+      facade.innerHTML = "";
+      facade.appendChild(iframe);
+    });
+  });
+}
+
+initYouTubeFacades();
+document.addEventListener("astro:page-load", initYouTubeFacades);
+</script>

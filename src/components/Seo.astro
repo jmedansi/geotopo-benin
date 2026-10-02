@@ -1,0 +1,65 @@
+---
+/**
+ * Seo.astro — Balises SEO, Open Graph, canonical.
+ * À placer dans le <head> de Base.astro.
+ */
+
+import { site } from "../config/site";
+
+interface Props {
+  /** Titre de la page (sans le nom du site) */
+  title: string;
+  /** Description courte (≤ 160 caractères) */
+  description?: string;
+  /** URL canonique absolue */
+  canonical?: string;
+  /** Image Open Graph (URL absolue) */
+  ogImage?: string;
+  /** Empêcher l'indexation (guides secrets, etc.) */
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = site.description,
+  canonical,
+  ogImage,
+  noindex = false,
+} = Astro.props;
+
+// Titre complet : "Nom de la page — Nom du site"
+const fullTitle = title === site.name ? site.name : `${title} — ${site.name}`;
+
+// URL canonique : on préfère celle passée en prop, sinon l'URL courante
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, site.url).toString();
+
+// Image OG par défaut : favicon (à remplacer par une vraie image sociale)
+const ogImageUrl = ogImage ?? `${site.url}/og-default.png`;
+---
+
+<!-- Encodage et viewport -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- Titre et description -->
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+
+<!-- Canonical -->
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- Robots -->
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content={site.name} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:locale" content="fr_FR" />
+
+<!-- Favicon -->
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<link rel="icon" type="image/x-icon" href="/favicon.ico" />

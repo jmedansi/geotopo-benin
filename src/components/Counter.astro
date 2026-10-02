@@ -1,0 +1,50 @@
+---
+/**
+ * Counter.astro — Élément de compteur chiffré animé au scroll.
+ */
+
+interface Props {
+  value: number;
+  suffix?: string;
+  label: string;
+  class?: string;
+}
+
+const { value, suffix = "", label, class: extraClass = "" } = Astro.props;
+---
+
+<div class={`topo-counter ${extraClass}`.trim()}>
+  <span
+    class="topo-counter__value"
+    data-counter={value}
+    data-counter-suffix={suffix}
+  >
+    0{suffix}
+  </span>
+  <span class="topo-counter__label">{label}</span>
+</div>
+
+<style>
+.topo-counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.topo-counter__value {
+  font-family: var(--font-mono);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  line-height: var(--leading-tight);
+}
+
+.topo-counter__label {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  max-width: 18ch;
+}
+</style>

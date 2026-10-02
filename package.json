@@ -1,0 +1,27 @@
+{
+  "name": "boutique-benin",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "check": "node scripts/check-content.mjs",
+    "build": "npm run check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "new:product": "node scripts/new-product.mjs",
+    "new:guide": "node scripts/new-guide.mjs",
+    "placeholders": "node scripts/generate-placeholders.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.2.1",
+    "astro": "^7.3.5",
+    "motion": "^13.5.0",
+    "sharp": "^0.33.5"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}

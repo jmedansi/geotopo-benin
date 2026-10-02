@@ -1,0 +1,363 @@
+/* ============================================================
+   motion.css — États du système d'animation
+   Importé par global.css.
+
+   Principe : le contenu est lisible SANS JavaScript.
+   Les états initiaux (cachés) ne s'appliquent que si la classe
+   `js` est posée sur <html> par le script inline de Base.astro.
+   ============================================================ */
+
+/* ----------------------------------------------------------
+   1. Révélation au scroll
+   data-reveal="up|left|right|zoom|fade"
+   ---------------------------------------------------------- */
+
+.js [data-reveal] {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.js [data-reveal="up"]    { transform: translate3d(0, 28px, 0); }
+.js [data-reveal="left"]  { transform: translate3d(-32px, 0, 0); }
+.js [data-reveal="right"] { transform: translate3d(32px, 0, 0); }
+.js [data-reveal="zoom"]  { transform: scale3d(0.94, 0.94, 1); }
+.js [data-reveal="fade"]  { transform: none; }
+
+/* Animé par motion.ts : on retire will-change pour ne pas garder
+   autant de couches de promotion en mémoire. */
+.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* Filet de sécurité : si motion.ts n'a pas démarré après 4 s
+   (chunk bloqué, erreur réseau, module cassé), on rétablit
+   l'affichage. Mieux vaut du contenu visible sans animation
+   qu'un contenu invisible. */
+.js.motion-fallback [data-reveal],
+.js.motion-fallback [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+  will-change: auto;
+}
+
+/* ----------------------------------------------------------
+   2. Trait SVG dessiné au scroll — data-draw
+   ---------------------------------------------------------- */
+
+[data-draw] path,
+[data-draw] line,
+[data-draw] circle,
+[data-draw] rect,
+[data-draw] polyline,
+[data-draw] polygon {
+  /* dasharray mesuré au runtime par motion.ts, valeur de repli */
+  stroke-dasharray: var(--draw-length, 1200);
+}
+
+.js [data-draw]:not(.is-drawn) path,
+.js [data-draw]:not(.is-drawn) line,
+.js [data-draw]:not(.is-drawn) circle,
+.js [data-draw]:not(.is-drawn) rect,
+.js [data-draw]:not(.is-drawn) polyline,
+.js [data-draw]:not(.is-drawn) polygon {
+  stroke-dashoffset: var(--draw-length, 1200);
+}
+
+[data-draw].is-drawn path,
+[data-draw].is-drawn line,
+[data-draw].is-drawn circle,
+[data-draw].is-drawn rect,
+[data-draw].is-drawn polyline,
+[data-draw].is-drawn polygon {
+  transition: stroke-dashoffset var(--dur-slow) var(--ease-out);
+  stroke-dashoffset: 0;
+}
+
+/* ----------------------------------------------------------
+   3. Parallaxe — data-parallax="0.15"
+   Le transform est écrit par motion.ts, ici on ne fait que
+   préparer la surface et éviter le débordement horizontal.
+   ---------------------------------------------------------- */
+
+.js [data-parallax] {
+  will-change: transform;
+}
+
+.js [data-parallax].is-settled {
+  will-change: auto;
+}
+
+/* ----------------------------------------------------------
+   4. Tilt 3D — data-tilt
+   Le parent porte data-tilt-perspective, l'élément est incliné.
+   ---------------------------------------------------------- */
+
+[data-tilt-perspective] {
+  perspective: 1200px;
+}
+
+[data-tilt] {
+  transform-style: preserve-3d;
+  transition: transform var(--transition-base) var(--ease-out);
+}
+
+/* Le tilt n'est jamais déclenché au toucher : sans ce garde-fou,
+   un glissement de doigt sur la carte la ferait basculer. */
+[data-tilt].is-tilting {
+  transition: none;
+}
+
+/* ----------------------------------------------------------
+   5. Bouton magnétique — data-magnetic
+   ---------------------------------------------------------- */
+
+.js [data-magnetic] {
+  transition: transform var(--transition-base) var(--ease-spring);
+  will-change: transform;
+}
+
+.js [data-magnetic].is-released {
+  transition: transform 480ms var(--ease-spring);
+  will-change: auto;
+}
+
+/* ----------------------------------------------------------
+   6. Compteur animé — data-counter
+   La valeur finale est déjà dans le HTML : sans JS, le chiffre
+   juste s'affiche. On réserve la largeur pour éviter tout
+   décalage pendant le comptage.
+   ---------------------------------------------------------- */
+
+[data-counter] {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------
+   7. Marquee — data-marquee
+   Le contenu est dupliqué une fois par motion.ts, la piste
+   défile par transform.
+   ---------------------------------------------------------- */
+
+/* Sans JavaScript, le bandeau doit rester consultable : on le rend
+   défilable au doigt et on retire le masque, sinon les items des
+   bords seraient estompés pour rien. Le comportement animé n'existe
+   que sous .js, où motion.ts duplique la piste. */
+[data-marquee] {
+  position: relative;
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.js [data-marquee] {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+}
+
+[data-marquee-track] {
+  display: flex;
+  flex: none;
+  align-items: center;
+  gap: var(--marquee-gap, var(--space-10));
+  padding-right: var(--marquee-gap, var(--space-10));
+  min-width: 100%;
+  will-change: transform;
+}
+
+/* ----------------------------------------------------------
+   8. Clone en vol vers le panier
+   Créé par motion.ts dans <body> : le style vit ici car un
+   élément créé en JS ne reçoit pas les styles scopés Astro.
+   ---------------------------------------------------------- */
+
+.motion-fly {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: calc(var(--z-lightbox) + 1);
+  pointer-events: none;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  box-shadow: var(--shadow-lg);
+  will-change: transform, opacity;
+}
+
+/* Rebond du compteur panier */
+@media (prefers-reduced-motion: no-preference) {
+  .site-header__cart-count.is-bouncing {
+    animation: cartBounce 520ms var(--ease-spring);
+  }
+}
+
+@keyframes cartBounce {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.55); }
+  55%  { transform: scale(0.88); }
+  78%  { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* ----------------------------------------------------------
+   9. Barre de progression de scroll — data-scroll-progress
+   ---------------------------------------------------------- */
+
+[data-scroll-progress] {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  z-index: calc(var(--z-header) + 1);
+  background-color: var(--color-accent-bright);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  will-change: transform;
+}
+
+/* ----------------------------------------------------------
+   10. Réticule suiveur — data-crosshair
+   Positionné par motion.ts sur la section sombre qui le contient.
+   ---------------------------------------------------------- */
+
+[data-crosshair] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+}
+
+[data-crosshair] svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform: translate3d(-50%, -50%, 0);
+  opacity: 0;
+  transition: opacity var(--transition-base) var(--ease-out);
+  will-change: transform, opacity;
+}
+
+[data-crosshair].is-active svg {
+  opacity: 1;
+}
+
+/* ----------------------------------------------------------
+   11. Contours de niveau — 3 couches de parallaxe
+   ---------------------------------------------------------- */
+
+[data-contours] {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+[data-contours-layer] {
+  position: absolute;
+  inset: -12% -6%;
+  will-change: transform;
+}
+
+[data-contours].is-settled [data-contours-layer] {
+  will-change: auto;
+}
+
+/* Le contenu d'une section à contours doit rester au-dessus */
+[data-contours-host] {
+  position: relative;
+  isolation: isolate;
+}
+
+[data-contours-host] > :not([data-contours]) {
+  position: relative;
+  z-index: 1;
+}
+
+/* ----------------------------------------------------------
+   12. Préférences de mouvement
+   ---------------------------------------------------------- */
+
+/* Sur mobile et écran tactile : ni parallaxe, ni effet souris.
+   Les translations restent actives car elles ne dépendent pas
+   du pointeur et restent lisibles. */
+@media (max-width: 767px), (pointer: coarse) {
+  .js [data-reveal] {
+    will-change: auto;
+  }
+
+  /* Le tilt et le magnétisme sont posés en inline par motion.ts,
+     qui les ignore déjà sur ces écrans. On neutralise au passage
+     toutrésidu de transform posé par une navigation précédente. */
+  [data-tilt],
+  .js [data-magnetic] {
+    transform: none !important;
+  }
+}
+
+/* prefers-reduced-motion : plus aucun déplacement, uniquement
+   des fondus. On rétablit l'affichage complet. */
+@media (prefers-reduced-motion: reduce) {
+  .js [data-reveal],
+  .js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: none;
+    will-change: auto;
+    transition: opacity 200ms linear;
+  }
+
+  [data-draw] path,
+  [data-draw] line,
+  [data-draw] circle,
+  [data-draw] rect,
+  [data-draw] polyline,
+  [data-draw] polygon {
+    stroke-dashoffset: 0 !important;
+  }
+
+  [data-draw].is-drawn path,
+  [data-draw].is-drawn line,
+  [data-draw].is-drawn circle,
+  [data-draw].is-drawn rect,
+  [data-draw].is-drawn polyline,
+  [data-draw].is-drawn polygon {
+    transition: none;
+  }
+
+  [data-parallax],
+  [data-contours-layer],
+  [data-marquee-track],
+  [data-scroll-progress],
+  [data-crosshair] svg {
+    transform: none !important;
+    will-change: auto;
+  }
+
+  [data-marquee] {
+    overflow-x: auto;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+
+  [data-crosshair] {
+    display: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

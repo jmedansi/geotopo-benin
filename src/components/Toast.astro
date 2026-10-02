@@ -1,0 +1,58 @@
+---
+/**
+ * Toast.astro — Annonce courte après un ajout au panier.
+ *
+ * La région `aria-live` est présente dans le HTML dès le premier rendu,
+ * et non créée par le script : un lecteur d'écran doit pouvoir
+ * surveiller une région stable pour ne pas manquer l'annonce.
+ *
+ * Rempli par src/scripts/motion.ts, à l'écoute de l'événement
+ * `panier-ajout`.
+ */
+---
+
+<div class="toast" data-toast role="status" aria-live="polite" aria-atomic="true"></div>
+
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: var(--space-6);
+    z-index: var(--z-overlay);
+
+    max-width: min(30rem, calc(100vw - var(--space-8)));
+    padding: var(--space-3) var(--space-5);
+
+    font-size: var(--text-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-snug);
+    text-align: center;
+
+    /* Pastille sombre sur fond clair : le texte reste lisible sans
+       dépendre de la couleur d'accent du thème. */
+    background-color: var(--color-dark-text);
+    color: var(--color-dark-bg);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-xl);
+
+    /* Masqué sans animation : visible uniquement une fois l'état posé. */
+    opacity: 0;
+    transform: translate(-50%, 12px);
+    pointer-events: none;
+    transition:
+      opacity var(--transition-base) var(--ease-out),
+      transform var(--transition-base) var(--ease-out);
+  }
+
+  .toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      transform: translate(-50%, 0);
+      transition: opacity 200ms linear;
+    }
+  }
+</style>

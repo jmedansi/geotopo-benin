@@ -1,0 +1,369 @@
+﻿---
+/**
+ * motion.astro — Banc d'essai du système d'animation (PROMPT 1).
+ *
+ * URL : /motion. Astro ignore les fichiers src/pages/_*.astro, si bien
+ * que le préfixe « /_motion » du guide aurait donné une page non
+ * routable. Les deux pages de service sont à supprimer en finitions.
+ *
+ * Cette page n'est pas destinée à la production : elle sert à vérifier
+ * d'un coup d'œil que chaque effet du guide fonctionne, et à les
+ * comparer sur le même écran. Elle est en noindex.
+ *
+ * Elle ne contient aucun script : tout passe par les attributs data-*
+ * lus par src/scripts/motion.ts, exactement comme les pages finales.
+ */
+
+import Base from "../layouts/Base.astro";
+import SectionHeading from "../components/SectionHeading.astro";
+import Counter from "../components/Counter.astro";
+import Marquee from "../components/Marquee.astro";
+import MagneticButton from "../components/MagneticButton.astro";
+import Accordion from "../components/Accordion.astro";
+import Tabs from "../components/Tabs.astro";
+import Contours from "../components/Contours.astro";
+import Crosshair from "../components/Crosshair.astro";
+
+const FAQ = [
+  {
+    question: "Le panier est-il réellement sécurisé ?",
+    answer:
+      "Aucune commande n'est enregistrée sur le site : la liste est construite dans votre navigateur, et vous la finalisez sur WhatsApp avec un conseiller.",
+  },
+  {
+    question: "Quels sont les délais de livraison ?",
+    answer:
+      "Les articles en boutique sont disponibles immédiatement. Les articles sur commande affichent leur délai sur la fiche produit.",
+  },
+  {
+    question: "Puis-je demander un devis pour un lot de chantier ?",
+    answer:
+      "Oui, la demande de devis se fait via WhatsApp : décrivez la surface, la hauteur de travail et l'accès au chantier.",
+  },
+];
+
+const ONGLETS = [
+  { label: "Niveau laser", slot: "laser" },
+  { label: "Station totale", slot: "station" },
+  { label: "Accessoires", slot: "accessoires" },
+];
+---
+
+<Base
+  title="Banc d'essai des animations"
+  description="Page de test interne : reveals, parallaxe, compteurs, tilt, magnétisme, tracé, défilement, onglets et accordéons."
+  noindex
+>
+  <!-- ============ 1. Révélations ============ -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Révélations au défilement"
+        subtitle="Cinq entrées possibles : up, left, right, zoom et fade. data-reveal-delay décale le départ."
+      />
+
+      <div class="grid-cols-3">
+        <div class="demo-tile" data-reveal="up">
+          <p class="demo-tile__name">data-reveal="up"</p>
+        </div>
+        <div class="demo-tile" data-reveal="left">
+          <p class="demo-tile__name">data-reveal="left"</p>
+        </div>
+        <div class="demo-tile" data-reveal="right">
+          <p class="demo-tile__name">data-reveal="right"</p>
+        </div>
+        <div class="demo-tile" data-reveal="zoom">
+          <p class="demo-tile__name">data-reveal="zoom"</p>
+        </div>
+        <div class="demo-tile" data-reveal="fade">
+          <p class="demo-tile__name">data-reveal="fade"</p>
+        </div>
+        <div class="demo-tile" data-reveal="up" data-reveal-delay="0.25">
+          <p class="demo-tile__name">delay 0.25 s</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 2. Cascade ============ -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Cascade"
+        subtitle="data-stagger sur le parent : les enfants entrent l'un après l'autre. L'attribut se lit sur le groupe, pas sur chaque carte."
+        align="start"
+      />
+
+      <div class="grid-cols-4" data-stagger>
+        {
+          ["Niveau", "Station", "Miroir", "Accessoire"].map((label) => (
+            <div class="demo-tile">
+              <p class="demo-tile__name">{label}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 3. Parallaxe, réticule, contours, compteurs ============ -->
+  <section class="section section--dark demo-dark">
+    <Crosshair />
+    <Contours variant="relief" count={8} inverted draw={false} />
+
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Repères de terrain"
+        subtitle="Section sombre : réticule suivant la souris, contours topographiques en fond, compteurs animés."
+        onDark
+      />
+
+      <div class="grid-cols-4">
+        <Counter value={18} label="Références" note="En boutique" />
+        <Counter value={6} label="Familles d'appareils" note="Du niveau au tracé" />
+        <Counter value={1250} suffix="+" label="Clients équipés" note="Chantiers Follow" />
+        <Counter value={15} suffix=" ans" label="D'expérience" note="Distribution" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 4. Parallaxe et tracé au défilement ============ -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Parallaxe et tracé progressif"
+        subtitle="data-parallax déplace la couche au défilement ; data-draw trace les courbes à l'entrée dans le champ."
+        align="start"
+      />
+
+      <div class="demo-parallax">
+        <div class="demo-parallax__layer" data-parallax="0.22">
+          <Contours variant="plateau" count={6} onLight />
+        </div>
+
+        <div class="demo-parallax__text">
+          <p data-reveal="up">
+            La valeur de <code>data-parallax</code> est un facteur, pas une
+            distance : plus il est élevé, plus la couche suit la page de loin.
+          </p>
+          <p data-reveal="up" data-reveal-delay="0.15">
+            Les effets de pointeur et de parallaxe sont coupés sous 768 px, sur
+            pointeur grossier et si <code>prefers-reduced-motion</code> est actif.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 5. Défilement, tilt, magnétisme ============ -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Survol et magnétisme"
+        subtitle="data-tilt incline la carte ; data-magnetic attire le bouton vers le pointeur. Les deux sont neutralisés au doigt."
+      />
+
+      <div class="grid-cols-3" data-stagger>
+        <div class="demo-tilt" data-tilt-perspective>
+          <div class="demo-tilt__inner" data-tilt>
+            <p class="demo-tile__name">data-tilt</p>
+          </div>
+        </div>
+        <div class="demo-tilt" data-tilt-perspective>
+          <div class="demo-tilt__inner" data-tilt>
+            <p class="demo-tile__name">data-tilt</p>
+          </div>
+        </div>
+        <div class="demo-tilt demo-tilt--callout">
+          <MagneticButton
+            href="https://wa.me/22900000000"
+            label="Demander un devis"
+            sublabel="Réponse sous 24 h"
+            variant="whatsapp"
+            icon="chat"
+            external
+          />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 6. Défilement horizontal ============ -->
+  <Marquee label="Familles d'appareils" speed={40}>
+    {
+      ["Niveaux laser", "Stations totales", "Miroirs de nivellement", "Accessoires", "Tracé", "Réparation"].map(
+        (label) => (
+          <span class="marquee__item">
+            {label}
+            <span class="marquee__dot" aria-hidden="true" />
+          </span>
+        )
+      )
+    }
+  </Marquee>
+
+  <!-- ============ 7. Onglets et accordéons ============ -->
+  <section class="section">
+    <div class="container">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="Onglets et accordéons"
+        subtitle="Les deux fonctionnent sans JavaScript : les onglets retombent sur tous les panneaux affichés, les accordéons sur des details natifs."
+        align="start"
+      />
+
+      <Tabs tabs={ONGLETS} label="Familles d'appareils" id="demo-tabs">
+        <p slot="laser">
+          Le niveau laser projette un plan horizontal ou vertical. C'est
+          l'appareil le plus demandé en second œuvre, parce qu'il se règle
+          seul après quelques secondes.
+        </p>
+        <p slot="station">
+          La station totale donne un point, un angle et une distance. Elle
+          sert au piquetage de fondations et au levé de façades.
+        </p>
+        <p slot="accessoires">
+          Mires, jalons, trépieds et cannettes : les accessoires font la
+          différence entre une mesure juste et une mesure approximative.
+        </p>
+      </Tabs>
+
+      <div class="demo-accordion">
+        <Accordion items={FAQ} id="demo-faq" openFirst />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 8. Retour ============ -->
+  <section class="section section--alt">
+    <div class="container demo-return">
+      <SectionHeading
+        eyebrow="Banc d'essai"
+        title="C'est tout pour le PROMPT 1"
+        subtitle="Cette page sert de référence : chaque effet y est présent une fois, sans exception."
+      />
+      <MagneticButton href="/" label="Retour à l'accueil" icon="arrow" />
+    </div>
+  </section>
+</Base>
+
+<style>
+  /*
+    Les classes .grid-cols-* sont en nombre fixe de colonnes. On les
+    rend mobiles ici plutôt que dans global.css : c'est une page de
+    test, et les grilles de contenu choisiront leurs propres points de
+    rupture.
+  */
+  @media (max-width: 1023px) {
+    .grid-cols-4 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 767px) {
+    .grid-cols-3,
+    .grid-cols-4 {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Tuiles d'essai */
+  .demo-tile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 7rem;
+    padding: var(--space-5);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+  }
+
+  .demo-tile__name {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+  }
+
+  .section--dark.demo-dark {
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Parallaxe */
+  .demo-parallax {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .demo-parallax__layer {
+    min-height: 16rem;
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-xl);
+    overflow: hidden;
+  }
+
+  .demo-parallax__text p {
+    max-width: 46ch;
+    color: var(--color-text-muted);
+  }
+
+  .demo-parallax__text code {
+    font-family: var(--font-mono);
+    font-size: var(--text-sm);
+    color: var(--color-accent);
+  }
+
+  /* Tilt */
+  .demo-tilt {
+    min-height: 9rem;
+  }
+
+  .demo-tilt__inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    min-height: 9rem;
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+  }
+
+  .demo-tilt--callout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-5);
+    border: 1px dashed var(--color-border-strong);
+    border-radius: var(--radius-lg);
+    background-color: var(--color-surface);
+  }
+
+  /* Séparateur du défilement : le composant Marquee ne fournit pas le
+     point, chaque page compose ses propres items. */
+  :global(.marquee__dot) {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-accent);
+  }
+
+  /* Accordéon sous les onglets */
+  .demo-accordion {
+    margin-top: var(--space-8);
+  }
+
+  /* Retour */
+  .demo-return {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-5);
+  }
+</style>

@@ -1,0 +1,832 @@
+---
+/**
+ * src/pages/panier.astro — Page Panier Ultra-Luxe & Envoi WhatsApp.
+ * Conforme à la spec PROMPT 5 & §6 bis du guide.
+ */
+
+import Base from "../layouts/Base.astro";
+import Contours from "../components/Contours.astro";
+import Crosshair from "../components/Crosshair.astro";
+import Breadcrumbs from "../components/Breadcrumbs.astro";
+import ScrollProgress from "../components/ScrollProgress.astro";
+
+import { site } from "../config/site";
+import { getProducts, getPacks } from "../lib/catalog";
+import { formatPrice } from "../lib/price";
+
+const products = await getProducts();
+const packs = await getPacks();
+
+// Dictionnaire du catalogue transmis au JS client pour hydratation instantanée
+const catalogMap: Record<string, {
+  type: "produit" | "pack";
+  slug: string;
+  title: string;
+  price?: number;
+  cover: string;
+  url: string;
+}> = {};
+
+products.forEach((p) => {
+  catalogMap[`produit:${p.id}`] = {
+    type: "produit",
+    slug: p.id,
+    title: p.data.title,
+    price: p.data.price,
+    cover: p.data.cover.src,
+    url: `/produit/${p.id}`,
+  };
+});
+
+packs.forEach((p) => {
+  catalogMap[`pack:${p.id}`] = {
+    type: "pack",
+    slug: p.id,
+    title: p.data.title,
+    price: p.data.price,
+    cover: p.data.cover.src,
+    url: `/pack/${p.id}`,
+  };
+});
+---
+
+<Base
+  title="Mon Panier d'Équipements"
+  description="Consultez et validez votre panier de matériel topographique. Envoi direct de votre demande de commande par WhatsApp."
+>
+  <ScrollProgress />
+  <Crosshair />
+
+  <!-- Injection des données du catalogue en JSON local -->
+  <script type="application/json" id="catalog-data" set:html={JSON.stringify(catalogMap)} />
+
+  <section class="section cart-page">
+    <div class="container">
+      <Breadcrumbs items={[{ label: "Panier" }]} />
+
+      <div class="cart-header" data-reveal="up">
+        <span class="cart-header__eyebrow">COMMANDE & DEVIS</span>
+        <h1 class="cart-header__title">Votre Panier de Matériel</h1>
+        <p class="cart-header__subtitle">
+          Vérifiez vos équipements sélectionnés ci-dessous. Votre commande sera transmise directement à notre équipe technique sur WhatsApp sans paiement en ligne.
+        </p>
+      </div>
+
+      <!-- État Panier Vide -->
+      <div class="cart-empty-state" id="cart-empty" style="display: none;">
+        <div class="cart-empty-card" data-reveal="up">
+          <div class="cart-empty-icon">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10" stroke-dasharray="4 2"></circle>
+              <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <path d="M16 10a4 4 0 01-8 0"></path>
+            </svg>
+          </div>
+          <h2 class="cart-empty-title">Votre panier est vide</h2>
+          <p class="cart-empty-text">
+            Vous n'avez pas encore ajouté de matériel ni de pack d'équipement à votre sélection.
+          </p>
+          <div class="cart-empty-actions">
+            <a href="/boutique" class="btn btn--accent btn--lg">
+              🔍 Explorer la boutique
+            </a>
+            <a href="/packs" class="btn btn--outline btn--lg">
+              📦 Voir nos packs complets
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- État Panier Rempli -->
+      <div class="cart-content-layout" id="cart-content" style="display: none;">
+        <!-- Colonne Gauche : Liste des articles -->
+        <div class="cart-items-col">
+          <div class="cart-items-header">
+            <span class="cart-items-count-label">Articles dans la commande :</span>
+            <button type="button" class="btn-text-danger" id="cart-clear-btn">
+              🗑️ Vider le panier
+            </button>
+          </div>
+
+          <div class="cart-items-list" id="cart-items-list">
+            <!-- Injecté en JS -->
+          </div>
+        </div>
+
+        <!-- Colonne Droite : Récapitulatif & WhatsApp -->
+        <aside class="cart-summary-col">
+          <div class="cart-summary-card">
+            <h2 class="cart-summary-title">Récapitulatif de commande</h2>
+
+            <div class="cart-summary-lines">
+              <div class="summary-line">
+                <span>Total références :</span>
+                <strong id="sum-items-count">0</strong>
+              </div>
+              <div class="summary-line">
+                <span>Total unités :</span>
+                <strong id="sum-total-qty">0</strong>
+              </div>
+              <div class="summary-line summary-line--subtotal">
+                <span>Sous-total estimé :</span>
+                <strong id="sum-subtotal-val" class="summary-subtotal-val">0 FCFA</strong>
+              </div>
+              <div class="summary-devis-count" id="sum-devis-notice" style="display: none;">
+                ⚠️ <span id="devis-count-text">0 article(s) sur devis</span> inclus (montant ajusté après échange).
+              </div>
+            </div>
+
+            <!-- Champ de Remarques Libre -->
+            <div class="cart-notes-group">
+              <label for="cart-notes-input" class="cart-notes-label">
+                📝 Remarques ou consignes particulières (facultatif) :
+              </label>
+              <textarea
+                id="cart-notes-input"
+                class="cart-notes-textarea"
+                placeholder="Ex: Besoin d'une facture proforma, livraison sur chantier à Parakou, demande de rallonge..."
+                rows="3"
+              ></textarea>
+            </div>
+
+            <!-- Alerte limite de 25 références -->
+            <div class="cart-limit-alert" id="cart-limit-alert" style="display: none;">
+              ⚠️ Vous avez atteint la limite maximale de 25 références distinctes.
+            </div>
+
+            <!-- Bouton WhatsApp Principal -->
+            <div class="cart-cta-box">
+              <button type="button" class="btn-whatsapp-submit" id="cart-whatsapp-submit">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.48 1.333 4.993l-1.416 5.176 5.297-1.389c1.458.796 3.104 1.216 4.773 1.217h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.038-5.176-2.924-7.063-1.886-1.887-4.393-2.925-7.066-2.925zm0 1.667c4.586 0 8.322 3.737 8.323 8.322 0 4.586-3.737 8.323-8.324 8.323-1.488 0-2.946-.395-4.223-1.144l-.303-.179-3.137.822.837-3.056-.197-.314a8.275 8.275 0 01-1.298-4.453c0-4.585 3.738-8.321 8.322-8.321z"/>
+                </svg>
+                <span>Envoyer la commande sur WhatsApp</span>
+              </button>
+
+              <p class="cart-disclaimer">
+                🤝 En cliquant sur ce bouton, votre liste d'articles sera automatiquement formatée et ouverte dans WhatsApp pour finaliser les modalités avec notre conseiller.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+.cart-header {
+  margin-block: var(--space-4) var(--space-8);
+  max-width: 720px;
+}
+
+.cart-header__eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+}
+
+.cart-header__title {
+  font-family: var(--font-serif);
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-block: var(--space-2);
+}
+
+.cart-header__subtitle {
+  font-size: var(--text-base);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+}
+
+/* Empty State */
+.cart-empty-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-12) var(--space-6);
+  text-align: center;
+  max-width: 600px;
+  margin: var(--space-8) auto;
+}
+
+.cart-empty-icon {
+  margin-bottom: var(--space-4);
+  display: flex;
+  justify-content: center;
+}
+
+.cart-empty-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  color: #FFFFFF;
+  margin-bottom: var(--space-2);
+}
+
+.cart-empty-text {
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+  margin-bottom: var(--space-6);
+}
+
+.cart-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  justify-content: center;
+}
+
+/* Filled Layout */
+.cart-content-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-8);
+  align-items: start;
+  margin-bottom: var(--space-16);
+}
+
+@media (max-width: 992px) {
+  .cart-content-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.cart-items-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-6);
+}
+
+.cart-items-count-label {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+}
+
+.btn-text-danger {
+  background: none;
+  border: none;
+  color: #FF4D4D;
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.btn-text-danger:hover {
+  background-color: rgba(255, 77, 77, 0.1);
+}
+
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Single Cart Row Item */
+.cart-item-card {
+  display: grid;
+  grid-template-columns: 90px 1fr auto auto;
+  gap: var(--space-4);
+  align-items: center;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: all var(--transition-fast);
+}
+
+@media (max-width: 640px) {
+  .cart-item-card {
+    grid-template-columns: 70px 1fr;
+    grid-template-rows: auto auto;
+  }
+}
+
+.cart-item-card:hover {
+  border-color: rgba(255, 107, 0, 0.4);
+}
+
+.cart-item-img {
+  width: 90px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-alt);
+}
+
+@media (max-width: 640px) {
+  .cart-item-img {
+    width: 70px;
+    height: 70px;
+  }
+}
+
+.cart-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cart-item-type-badge {
+  align-self: flex-start;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-bold);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+}
+
+.cart-item-type-badge--produit {
+  background-color: rgba(0, 229, 255, 0.15);
+  color: var(--color-cyan);
+}
+
+.cart-item-type-badge--pack {
+  background-color: rgba(255, 107, 0, 0.15);
+  color: var(--color-accent);
+}
+
+.cart-item-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  text-decoration: none;
+  line-height: 1.3;
+}
+
+.cart-item-title:hover {
+  color: var(--color-accent);
+}
+
+.cart-item-unit-price {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+}
+
+/* Quantity Control */
+.cart-item-qty-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 2px;
+}
+
+.qty-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.qty-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-accent);
+}
+
+.qty-input {
+  width: 40px;
+  text-align: center;
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  -moz-appearance: textfield;
+}
+
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cart-item-line-total {
+  text-align: right;
+  min-width: 110px;
+}
+
+.line-total-val {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+}
+
+.line-total-val.is-devis {
+  color: var(--color-cyan);
+}
+
+.btn-remove-item {
+  background: none;
+  border: none;
+  color: var(--color-text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast);
+}
+
+.btn-remove-item:hover {
+  color: #FF4D4D;
+}
+
+/* Summary Card */
+.cart-summary-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  position: sticky;
+  top: calc(var(--header-height) + 24px);
+}
+
+.cart-summary-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.cart-summary-lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.summary-line {
+  display: flex;
+  justify-content: space-between;
+  font-size: var(--text-sm);
+  color: #E2E8F0;
+}
+
+.summary-line--subtotal {
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--text-base);
+}
+
+.summary-subtotal-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+}
+
+.summary-devis-notice {
+  font-size: var(--text-xs);
+  color: var(--color-cyan);
+  background-color: rgba(0, 229, 255, 0.08);
+  border: 1px solid rgba(0, 229, 255, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.cart-notes-group {
+  margin-bottom: var(--space-6);
+}
+
+.cart-notes-label {
+  display: block;
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  margin-bottom: var(--space-2);
+}
+
+.cart-notes-textarea {
+  width: 100%;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  resize: vertical;
+}
+
+.cart-notes-textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+}
+
+.cart-limit-alert {
+  background-color: rgba(255, 77, 77, 0.15);
+  border: 1px solid #FF4D4D;
+  color: #FF4D4D;
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-4);
+}
+
+.cart-cta-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.btn-whatsapp-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-4) var(--space-4);
+  background-color: #25D366;
+  color: #FFFFFF;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+}
+
+.btn-whatsapp-submit:hover {
+  background-color: #20bd5a;
+  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
+  transform: translateY(-2px);
+}
+
+.cart-disclaimer {
+  font-size: 11px;
+  color: var(--color-text-dim);
+  line-height: var(--leading-relaxed);
+  text-align: center;
+}
+</style>
+
+<script>
+  import { getCart, updateCartQty, removeFromCart, clearCart, MAX_CART_ITEMS } from "../lib/cart";
+  import { site } from "../config/site";
+
+  // Formateur de prix FCFA
+  function formatPrice(val?: number): string {
+    if (val === undefined || val === null) return "Sur devis";
+    return val.toLocaleString("fr-FR").replace(/\s/g, " ") + " FCFA";
+  }
+
+  function renderCartPage() {
+    const rawCatalogData = document.getElementById("catalog-data")?.textContent;
+    if (!rawCatalogData) return;
+
+    const catalogMap: Record<string, {
+      type: "produit" | "pack";
+      slug: string;
+      title: string;
+      price?: number;
+      cover: string;
+      url: string;
+    }> = JSON.parse(rawCatalogData);
+
+    const cart = getCart();
+
+    const emptyContainer = document.getElementById("cart-empty");
+    const contentContainer = document.getElementById("cart-content");
+    const listContainer = document.getElementById("cart-items-list");
+    const limitAlert = document.getElementById("cart-limit-alert");
+
+    if (!emptyContainer || !contentContainer || !listContainer) return;
+
+    if (cart.length === 0) {
+      emptyContainer.style.display = "block";
+      contentContainer.style.display = "none";
+      return;
+    }
+
+    emptyContainer.style.display = "none";
+    contentContainer.style.display = "grid";
+
+    // Vérification de la limite de 25 références
+    if (limitAlert) {
+      limitAlert.style.display = cart.length >= MAX_CART_ITEMS ? "block" : "none";
+    }
+
+    let totalQty = 0;
+    let subtotal = 0;
+    let devisCount = 0;
+
+    // Vider le conteneur de liste
+    listContainer.innerHTML = "";
+
+    cart.forEach((item) => {
+      const key = `${item.type}:${item.slug}`;
+      const itemData = catalogMap[key];
+
+      if (!itemData) return; // Si l'article n'existe plus dans le catalogue
+
+      totalQty += item.qty;
+      const isDevis = itemData.price === undefined || itemData.price === null;
+      
+      if (isDevis) {
+        devisCount += item.qty;
+      } else {
+        subtotal += itemData.price! * item.qty;
+      }
+
+      // Créer la carte d'élément du panier
+      const card = document.createElement("div");
+      card.className = "cart-item-card";
+
+      const formattedUnit = isDevis ? "Sur devis" : formatPrice(itemData.price);
+      const formattedTotal = isDevis ? "Sur devis" : formatPrice(itemData.price! * item.qty);
+
+      card.innerHTML = `
+        <img src="${itemData.cover}" alt="${itemData.title}" class="cart-item-img" width="90" height="90" loading="lazy" />
+        
+        <div class="cart-item-info">
+          <span class="cart-item-type-badge cart-item-type-badge--${itemData.type}">
+            ${itemData.type === "pack" ? "Pack Compléte" : "Produit"}
+          </span>
+          <a href="${itemData.url}" class="cart-item-title">${itemData.title}</a>
+          <span class="cart-item-unit-price">${formattedUnit} / unité</span>
+        </div>
+
+        <div class="cart-item-qty-control">
+          <button type="button" class="qty-btn btn-minus" data-slug="${item.slug}" data-type="${item.type}">-</button>
+          <input type="number" class="qty-input" value="${item.qty}" min="1" max="99" data-slug="${item.slug}" data-type="${item.type}" aria-label="Quantité" />
+          <button type="button" class="qty-btn btn-plus" data-slug="${item.slug}" data-type="${item.type}">+</button>
+        </div>
+
+        <div class="cart-item-line-total">
+          <span class="line-total-val ${isDevis ? "is-devis" : ""}">${formattedTotal}</span>
+        </div>
+
+        <button type="button" class="btn-remove-item" data-slug="${item.slug}" data-type="${item.type}" title="Supprimer de la commande">
+          ✕
+        </button>
+      `;
+
+      listContainer.appendChild(card);
+    });
+
+    // Mise à jour des totaux dans le récapitulatif
+    const countEl = document.getElementById("sum-items-count");
+    const totalQtyEl = document.getElementById("sum-total-qty");
+    const subtotalEl = document.getElementById("sum-subtotal-val");
+    const devisNotice = document.getElementById("sum-devis-notice");
+    const devisText = document.getElementById("devis-count-text");
+
+    if (countEl) countEl.textContent = String(cart.length);
+    if (totalQtyEl) totalQtyEl.textContent = String(totalQty);
+    if (subtotalEl) subtotalEl.textContent = formatPrice(subtotal);
+
+    if (devisNotice && devisText) {
+      if (devisCount > 0) {
+        devisNotice.style.display = "block";
+        devisText.textContent = `${devisCount} unité(s) sur devis`;
+      } else {
+        devisNotice.style.display = "none";
+      }
+    }
+
+    // Wiring des événements sur la liste
+    attachCartEventListeners(catalogMap);
+  }
+
+  function attachCartEventListeners(catalogMap: any) {
+    // Boutons - (décrémenter)
+    document.querySelectorAll(".btn-minus").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const slug = target.dataset.slug!;
+        const type = target.dataset.type as "produit" | "pack";
+        const cart = getCart();
+        const current = cart.find((i) => i.slug === slug && i.type === type);
+        if (current) {
+          updateCartQty(slug, type, current.qty - 1);
+        }
+      });
+    });
+
+    // Boutons + (incrémenter)
+    document.querySelectorAll(".btn-plus").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const slug = target.dataset.slug!;
+        const type = target.dataset.type as "produit" | "pack";
+        const cart = getCart();
+        const current = cart.find((i) => i.slug === slug && i.type === type);
+        if (current) {
+          updateCartQty(slug, type, current.qty + 1);
+        }
+      });
+    });
+
+    // Saisie directe de quantité
+    document.querySelectorAll(".qty-input").forEach((input) => {
+      input.addEventListener("change", (e) => {
+        const target = e.target as HTMLInputElement;
+        const slug = target.dataset.slug!;
+        const type = target.dataset.type as "produit" | "pack";
+        const val = parseInt(target.value, 10);
+        if (!isNaN(val) && val > 0) {
+          updateCartQty(slug, type, val);
+        } else {
+          updateCartQty(slug, type, 1);
+        }
+      });
+    });
+
+    // Suppression d'un article
+    document.querySelectorAll(".btn-remove-item").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const target = e.currentTarget as HTMLElement;
+        const slug = target.dataset.slug!;
+        const type = target.dataset.type as "produit" | "pack";
+        removeFromCart(slug, type);
+      });
+    });
+  }
+
+  // Vider le panier complet
+  document.getElementById("cart-clear-btn")?.addEventListener("click", () => {
+    if (confirm("Êtes-vous sûr de vouloir vider l'ensemble de votre panier ?")) {
+      clearCart();
+    }
+  });
+
+  // Soumission WhatsApp Génératrice
+  document.getElementById("cart-whatsapp-submit")?.addEventListener("click", () => {
+    const rawCatalogData = document.getElementById("catalog-data")?.textContent;
+    if (!rawCatalogData) return;
+
+    const catalogMap: Record<string, any> = JSON.parse(rawCatalogData);
+    const cart = getCart();
+
+    if (cart.length === 0) return;
+
+    let totalSubtotal = 0;
+    let hasDevisItems = false;
+
+    const lines = cart.map((item) => {
+      const key = `${item.type}:${item.slug}`;
+      const data = catalogMap[key];
+      if (!data) return `- ${item.qty} × ${item.slug}`;
+
+      if (data.price !== undefined && data.price !== null) {
+        totalSubtotal += data.price * item.qty;
+        return `- ${item.qty} × ${data.title} — ${formatPrice(data.price * item.qty)}`;
+      } else {
+        hasDevisItems = true;
+        return `- ${item.qty} × ${data.title} — Sur devis`;
+      }
+    });
+
+    const notesInput = (document.getElementById("cart-notes-input") as HTMLTextAreaElement)?.value.trim();
+
+    // Formattage du message WhatsApp strict du guide (§6 bis)
+    let message = `Bonjour, je souhaite passer commande sur ${site.name} :\n\n`;
+    message += lines.join("\n");
+    message += `\n\nTotal indicatif ${hasDevisItems ? "(hors sur devis)" : ""} : ${formatPrice(totalSubtotal)}`;
+
+    if (notesInput) {
+      message += `\n\nRemarques : ${notesInput}`;
+    }
+
+    const waUrl = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, "_blank");
+  });
+
+  // Écouteurs globaux
+  document.addEventListener("DOMContentLoaded", renderCartPage);
+  document.addEventListener("astro:page-load", renderCartPage);
+  window.addEventListener("panier-mis-a-jour", renderCartPage);
+</script>

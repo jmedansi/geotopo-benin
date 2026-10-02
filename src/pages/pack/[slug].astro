@@ -1,0 +1,524 @@
+---
+/**
+ * src/pages/pack/[slug].astro — Fiche Pack d'Équipements.
+ * Conforme à la spec PROMPT 5 du guide.
+ */
+
+import { render } from "astro:content";
+import Image from "astro/components/Image.astro";
+import Base from "../../layouts/Base.astro";
+import Contours from "../../components/Contours.astro";
+import Crosshair from "../../components/Crosshair.astro";
+import Breadcrumbs from "../../components/Breadcrumbs.astro";
+import ProductCard from "../../components/ProductCard.astro";
+import AddToCart from "../../components/AddToCart.astro";
+import WhatsAppButton from "../../components/WhatsAppButton.astro";
+import ScrollProgress from "../../components/ScrollProgress.astro";
+import SectionHeading from "../../components/SectionHeading.astro";
+
+import { site } from "../../config/site";
+import { getPacks, getPackProducts } from "../../lib/catalog";
+import { formatPrice, isSurDevis } from "../../lib/price";
+import { waMessageProduit, waMessageDevis, waLink } from "../../lib/whatsapp";
+
+export async function getStaticPaths() {
+  const packs = await getPacks();
+  return packs.map((p) => ({
+    params: { slug: p.id },
+    props: { pack: p },
+  }));
+}
+
+const { pack } = Astro.props;
+const { title, summary, cover, price, availability, leadTime, products: productSlugs } = pack.data;
+
+const { Content } = await render(pack);
+const packProducts = await getPackProducts(pack);
+
+const formattedPrice = formatPrice(price);
+const devisMode = isSurDevis(price);
+const isBoutique = availability === "en-boutique";
+
+// Calcul du prix individuel séparé et de l'économie réalisée
+let separateTotal = 0;
+let hasAllPrices = true;
+
+for (const prod of packProducts) {
+  if (prod.data.price) {
+    separateTotal += prod.data.price;
+  } else {
+    hasAllPrices = false;
+  }
+}
+
+const savings = hasAllPrices && price && separateTotal > price ? separateTotal - price : null;
+const savingsPercent = savings ? Math.round((savings / separateTotal) * 100) : null;
+
+// URL absolue et messages WhatsApp
+const pageUrl = new URL(Astro.url.pathname, site.url).toString();
+const waMessage = devisMode
+  ? waMessageDevis(`Pack : ${title}`, pageUrl)
+  : waMessageProduit(`Pack : ${title}`, formattedPrice, pageUrl);
+
+const questionMessage = `Bonjour, j'ai une question sur le Pack Topo : ${title} (${pageUrl})`;
+---
+
+<Base title={title} description={summary} ogImage={cover.src}>
+  <ScrollProgress />
+  <Crosshair />
+
+  <!-- Section Hero / Fiche Pack -->
+  <section class="section pack-detail-page">
+    <div class="container">
+      <Breadcrumbs
+        items={[
+          { label: "Packs complets", href: "/packs" },
+          { label: title },
+        ]}
+      />
+
+      <div class="pack-detail-grid">
+        <!-- Media / Visuel Pack -->
+        <div class="pack-media-col" data-reveal="up">
+          <div class="pack-media-card">
+            <Image
+              src={cover}
+              alt={title}
+              width={800}
+              height={600}
+              class="pack-media-img"
+              loading="eager"
+            />
+            <span class="pack-badge-tag">KIT CLÉ EN MAIN</span>
+          </div>
+
+          <!-- Miniatures des produits inclus -->
+          <div class="included-miniatures">
+            <h3 class="miniatures-title">Matériels inclus dans ce coffret ({packProducts.length})</h3>
+            <div class="miniatures-grid">
+              {packProducts.map((prod) => (
+                <a href={`/produit/${prod.id}`} class="miniature-item" title={prod.data.title}>
+                  <Image src={prod.data.cover} alt={prod.data.title} width={80} height={80} class="miniature-img" />
+                  <span class="miniature-name">{prod.data.title}</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <!-- Infos & Boutons D'action -->
+        <div class="pack-info-col" data-reveal="up" data-reveal-delay="150">
+          <span class="pack-eyebrow">ENSEMBLE DE MATÉRIEL PROFESSIONNEL</span>
+          <h1 class="pack-title">{title}</h1>
+          
+          <p class="pack-summary">{summary}</p>
+
+          <div class="pack-badges-row">
+            {isBoutique ? (
+              <span class="badge badge--boutique">⚡ En stock à Cotonou — Prêt à livrer</span>
+            ) : (
+              <span class="badge badge--commande">📦 Sur commande {leadTime ? `(${leadTime})` : ""}</span>
+            )}
+            {savingsPercent && (
+              <span class="badge badge--savings">🔥 Économisez {savingsPercent}% en pack</span>
+            )}
+          </div>
+
+          <!-- Bloc Prix & Remise -->
+          <div class="pack-price-box">
+            <div class="pack-price-header">
+              <span class="pack-price-label">Tarif de l'ensemble :</span>
+              {savings && (
+                <span class="separate-price-crossed">
+                  {formatPrice(separateTotal)}
+                </span>
+              )}
+            </div>
+            <div class="pack-price-main">
+              <span class={`pack-price-val ${devisMode ? "is-devis" : ""}`}>
+                {formattedPrice}
+              </span>
+            </div>
+
+            {savings && (
+              <div class="savings-alert">
+                <span>🎁 Vous économisez <strong>{formatPrice(savings)}</strong> par rapport aux achats séparés.</span>
+              </div>
+            )}
+          </div>
+
+          <!-- Desktop Actions -->
+          <div class="pack-actions-desktop">
+            <AddToCart slug={pack.id} type="pack" size="lg" variant="outline" full={true} />
+            <WhatsAppButton
+              message={waMessage}
+              label={devisMode ? "Demander un devis Pack sur WhatsApp" : "Commander ce Pack sur WhatsApp"}
+              variant="whatsapp"
+              size="lg"
+              full={true}
+            />
+            <a href={waLink(questionMessage)} target="_blank" rel="noopener noreferrer" class="btn btn--ghost btn--full">
+              💬 Poser une question au géomètre conseil
+            </a>
+          </div>
+
+          <!-- Services Offerts -->
+          <div class="pack-perks-list">
+            <div class="perk-item">
+              <span class="perk-icon">🎓</span>
+              <div>
+                <strong>Prise en main & Formation offertes</strong>
+                <p>1/2 journée de formation au maniement du matériel dans nos locaux à Cotonou.</p>
+              </div>
+            </div>
+            <div class="perk-item">
+              <span class="perk-icon">🛡️</span>
+              <div>
+                <strong>Garantie & Support Réactif</strong>
+                <p>Matériel garanti 1 an avec SAV local assuré par nos techniciens.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Produits inclus détaillés -->
+  <section class="section section--alt">
+    <div class="container">
+      <SectionHeading
+        eyebrow="COMPOSANTS DU PACK"
+        title="Détail des équipements inclus"
+        subtitle="Découvrez la fiche complète de chaque instrument composant ce kit."
+      />
+
+      <div class="grid-pack-products" data-stagger="0.1">
+        {packProducts.map((prod) => (
+          <ProductCard product={prod} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Description textuelle -->
+  <section class="section">
+    <div class="container container--narrow">
+      <h2 class="pack-desc-title">Présentation détaillée du pack</h2>
+      <div class="prose pack-prose" data-reveal="up">
+        <Content />
+      </div>
+    </div>
+  </section>
+
+  <!-- Barre Sticky Mobile d'Achat -->
+  <div class="mobile-sticky-bar" id="mobileStickyBar">
+    <div class="mobile-sticky-inner">
+      <div class="mobile-sticky-price">
+        <span class="mobile-sticky-title">{title}</span>
+        <span class="mobile-sticky-val">{formattedPrice}</span>
+      </div>
+      <div class="mobile-sticky-actions">
+        <AddToCart slug={pack.id} type="pack" size="md" variant="icon-only" />
+        <WhatsAppButton
+          message={waMessage}
+          label="Commander"
+          variant="whatsapp"
+          size="md"
+        />
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+.pack-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-10);
+  margin-block: var(--space-6) var(--space-12);
+}
+
+@media (max-width: 900px) {
+  .pack-detail-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+  }
+}
+
+.pack-media-card {
+  position: relative;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  aspect-ratio: 4 / 3;
+}
+
+.pack-media-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pack-badge-tag {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  letter-spacing: var(--tracking-wider);
+}
+
+.included-miniatures {
+  margin-top: var(--space-6);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.miniatures-title {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-wider);
+  margin-bottom: var(--space-3);
+}
+
+.miniatures-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: var(--space-3);
+}
+
+.miniature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  text-decoration: none;
+  background-color: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2);
+  transition: border-color var(--transition-fast);
+}
+
+.miniature-item:hover {
+  border-color: var(--color-accent);
+}
+
+.miniature-img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  margin-bottom: var(--space-1);
+}
+
+.miniature-name {
+  font-size: var(--text-xs);
+  color: #FFFFFF;
+  line-height: var(--leading-tight);
+}
+
+.pack-eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--tracking-widest);
+}
+
+.pack-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+  margin-block: var(--space-2) var(--space-3);
+}
+
+.pack-summary {
+  font-size: var(--text-base);
+  color: #E2E8F0;
+  line-height: var(--leading-relaxed);
+  margin-bottom: var(--space-4);
+}
+
+.pack-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.badge--savings {
+  background-color: rgba(255, 107, 0, 0.2);
+  color: var(--color-accent);
+  border: 1px solid var(--color-accent);
+}
+
+.pack-price-box {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.pack-price-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-1);
+}
+
+.pack-price-label {
+  font-size: var(--text-xs);
+  font-family: var(--font-mono);
+  color: var(--color-text-dim);
+  text-transform: uppercase;
+}
+
+.separate-price-crossed {
+  font-size: var(--text-sm);
+  color: var(--color-text-dim);
+  text-decoration: line-through;
+}
+
+.pack-price-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+}
+
+.pack-price-val.is-devis {
+  color: var(--color-cyan);
+}
+
+.savings-alert {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px dashed var(--color-border);
+  font-size: var(--text-xs);
+  color: #25D366;
+}
+
+.pack-actions-desktop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.pack-perks-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background-color: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.perk-item {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.perk-icon {
+  font-size: 24px;
+}
+
+.perk-item strong {
+  display: block;
+  font-size: var(--text-sm);
+  color: #FFFFFF;
+}
+
+.perk-item p {
+  font-size: var(--text-xs);
+  color: #E2E8F0;
+  margin: 0;
+}
+
+.grid-pack-products {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--space-6);
+}
+
+.pack-desc-title {
+  font-family: var(--font-serif);
+  font-size: var(--text-2xl);
+  color: #FFFFFF;
+  margin-bottom: var(--space-4);
+}
+
+.container--narrow {
+  max-width: 800px;
+}
+
+/* Mobile Sticky Bar */
+.mobile-sticky-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background-color: var(--color-bg-alt);
+  border-top: 1px solid var(--color-border);
+  padding: var(--space-3) var(--space-4);
+  box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 768px) {
+  .mobile-sticky-bar {
+    display: block;
+  }
+}
+
+.mobile-sticky-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.mobile-sticky-price {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobile-sticky-title {
+  font-size: var(--text-xs);
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.mobile-sticky-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  color: #FFFFFF;
+}
+
+.mobile-sticky-actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+</style>

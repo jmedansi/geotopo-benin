@@ -1,0 +1,109 @@
+---
+/**
+ * Contours.astro — Courbes de niveau SVG générées (identité géotopo).
+ * 3 variantes : 'hero' | 'subtle' | 'dense'
+ * 3 couches en parallaxe (data-parallax="0.1" / "0.2" / "0.3")
+ */
+
+interface Props {
+  variant?: "hero" | "subtle" | "dense";
+  draw?: boolean;
+  class?: string;
+}
+
+const { variant = "hero", draw = false, class: extraClass = "" } = Astro.props;
+const opacity = variant === "subtle" ? "0.15" : variant === "dense" ? "0.3" : "0.22";
+---
+
+<div class={`topo-contours topo-contours--${variant} ${extraClass}`.trim()} aria-hidden="true">
+  <!-- Couche 1 : Courbes de fond (vitesse 0.1) -->
+  <svg
+    class="topo-contours__layer topo-contours__layer--1"
+    data-parallax="0.1"
+    viewBox="0 0 1200 800"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M -100 200 C 200 100, 500 350, 800 250 C 1000 180, 1200 300, 1400 200"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-opacity={opacity}
+      data-draw={draw ? "true" : undefined}
+    />
+    <path
+      d="M -100 350 C 250 250, 450 500, 750 380 C 950 300, 1150 420, 1400 320"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-opacity={opacity}
+      data-draw={draw ? "true" : undefined}
+    />
+  </svg>
+
+  <!-- Couche 2 : Courbes médianes (vitesse 0.2) -->
+  <svg
+    class="topo-contours__layer topo-contours__layer--2"
+    data-parallax="0.2"
+    viewBox="0 0 1200 800"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M -100 120 C 300 40, 600 220, 900 140 C 1100 90, 1300 220, 1500 150"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-dasharray="6 4"
+      stroke-opacity={opacity}
+      data-draw={draw ? "true" : undefined}
+    />
+    <path
+      d="M -100 500 C 150 400, 550 650, 850 520 C 1050 430, 1250 580, 1450 480"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-opacity={opacity}
+      data-draw={draw ? "true" : undefined}
+    />
+  </svg>
+
+  <!-- Couche 3 : Courbes de premier plan (vitesse 0.3) -->
+  <svg
+    class="topo-contours__layer topo-contours__layer--3"
+    data-parallax="0.3"
+    viewBox="0 0 1200 800"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M -100 620 C 220 540, 620 720, 920 600 C 1120 520, 1320 640, 1500 580"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-opacity={opacity}
+      data-draw={draw ? "true" : undefined}
+    />
+    <!-- Marqueurs d'altitude géotopo (ex. 125m) -->
+    <text x="630" y="705" font-family="monospace" font-size="11" fill="currentColor" opacity="0.4">125 m</text>
+    <text x="210" y="105" font-family="monospace" font-size="11" fill="currentColor" opacity="0.4">150 m</text>
+  </svg>
+</div>
+
+<style>
+.topo-contours {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  color: var(--color-accent);
+}
+
+.topo-contours--subtle {
+  color: var(--color-border-strong);
+}
+
+.topo-contours__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  will-change: transform;
+}
+</style>

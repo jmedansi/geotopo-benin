@@ -1,0 +1,111 @@
+---
+/**
+ * Base.astro — Layout principal de toutes les pages.
+ * Inclut : SEO, styles globaux, ClientRouter, Header, Toast, main, Footer, slot.
+ */
+
+import { ClientRouter } from "astro:transitions";
+import Seo from "../components/Seo.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import Toast from "../components/Toast.astro";
+import ScrollProgress from "../components/ScrollProgress.astro";
+import "../styles/global.css";
+
+interface Props {
+  /** Titre de la page (sans le nom du site) */
+  title: string;
+  /** Description courte pour le SEO (≤ 160 caractères) */
+  description?: string;
+  /** URL canonique absolue (optionnelle, déduite de l'URL courante sinon) */
+  canonical?: string;
+  /** Image Open Graph absolue */
+  ogImage?: string;
+  /** Masquer la page dans les moteurs de recherche */
+  noindex?: boolean;
+}
+
+const { title, description, canonical, ogImage, noindex } = Astro.props;
+---
+
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <Seo
+      title={title}
+      description={description}
+      canonical={canonical}
+      ogImage={ogImage}
+      noindex={noindex}
+    />
+
+    <ClientRouter />
+
+    <!--
+      Pose la classe `js` sur <html> avant le premier rendu de la page.
+      Les styles d'animation ne masquent un élément que sous `.js` :
+      sans JavaScript, tout le contenu reste lisible.
+    -->
+    <script is:inline>
+      (function () {
+        var root = document.documentElement;
+        root.classList.add("js");
+
+        // Filet de sécurité : si motion.ts ne démarre pas (chunk bloqué,
+        // erreur réseau), les éléments sont réaffichés au bout de 4 s
+        // plutôt que de rester invisibles. motion.ts retire la classe
+        // dès qu'il est prêt.
+        window.armMotionFallback = function (target) {
+          target.classList.remove("motion-fallback");
+          window.setTimeout(function () {
+            target.classList.add("motion-fallback");
+          }, 4000);
+        };
+
+        window.armMotionFallback(root);
+
+        // Le timer doit être reposé sur le nouveau <html> à chaque
+        // navigation : le ClientRouter remplace l'élément, et le timer
+        // initial ne le couvre plus.
+        if (window.__geotopoBeforeSwap) return;
+        window.__geotopoBeforeSwap = true;
+
+        document.addEventListener("astro:before-swap", function (event) {
+          var next = event.newDocument.documentElement;
+          if (document.documentElement.classList.contains("js")) {
+            next.classList.add("js");
+          }
+          window.armMotionFallback(next);
+        });
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Barre de progression de lecture, pilotée par data-scroll-progress -->
+    <ScrollProgress />
+
+    <!-- Header de navigation (persistant d'une page à l'autre) -->
+    <Header />
+
+    <!-- Contenu principal — le slot reçoit tout le contenu de la page -->
+    <main id="contenu-principal" tabindex="-1">
+      <slot />
+    </main>
+
+    <Footer />
+
+    <!-- Annonces d'ajout au panier pour les lecteurs d'écran -->
+    <Toast />
+  </body>
+</html>
+
+<script>
+  /**
+   * Un seul point d'entrée pour le système d'animation : les pages
+   * n'écrivent jamais de JavaScript d'animation, elles posent des attributs.
+   */
+  import "../scripts/motion";
+</script>

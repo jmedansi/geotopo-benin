@@ -1,0 +1,44 @@
+---
+/**
+ * Breadcrumbs.astro — Fil d'Ariane sémantique.
+ */
+
+export interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props;
+---
+
+<nav aria-label="Fil d'Ariane" class="breadcrumbs-wrapper">
+  <ol class="breadcrumbs" role="list">
+    <li>
+      <a href="/">Accueil</a>
+    </li>
+    {items.map((item, index) => {
+      const isLast = index === items.length - 1;
+      return (
+        <li>
+          <span class="breadcrumbs__sep" aria-hidden="true">/</span>
+          {isLast || !item.href ? (
+            <span aria-current="page">{item.label}</span>
+          ) : (
+            <a href={item.href}>{item.label}</a>
+          )}
+        </li>
+      );
+    })}
+  </ol>
+</nav>
+
+<style>
+.breadcrumbs-wrapper {
+  padding-block: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+</style>

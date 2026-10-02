@@ -1,0 +1,22 @@
+---
+/**
+ * MagneticButton.astro — Conteneur appliquant l'effet magnétique au survol.
+ */
+
+interface Props {
+  class?: string;
+}
+
+const { class: extraClass = "" } = Astro.props;
+---
+
+<div class={`magnetic-wrapper ${extraClass}`.trim()} data-magnetic>
+  <slot />
+</div>
+
+<style>
+.magnetic-wrapper {
+  display: inline-block;
+  will-change: transform;
+}
+</style>

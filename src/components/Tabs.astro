@@ -1,0 +1,147 @@
+---
+/**
+ * Tabs.astro — Système d'onglets accessible.
+ */
+
+interface TabItem {
+  id: string;
+  label: string;
+}
+
+interface Props {
+  tabs: TabItem[];
+  class?: string;
+}
+
+const { tabs, class: extraClass = "" } = Astro.props;
+---
+
+<div class={`topo-tabs ${extraClass}`.trim()} id="topo-tabs-component">
+  <div class="topo-tabs__nav" role="tablist" aria-label="Sélection par onglet">
+    {tabs.map((tab, idx) => (
+      <button
+        type="button"
+        role="tab"
+        id={`tab-${tab.id}`}
+        aria-selected={idx === 0 ? "true" : "false"}
+        aria-controls={`panel-${tab.id}`}
+        tabindex={idx === 0 ? 0 : -1}
+        class={`topo-tabs__tab ${idx === 0 ? "is-active" : ""}`}
+        data-tab-id={tab.id}
+      >
+        {tab.label}
+      </button>
+    ))}
+    <!-- Barre d'indicateur souligné -->
+    <div class="topo-tabs__indicator" id="tabs-indicator"></div>
+  </div>
+</div>
+
+<style>
+.topo-tabs {
+  position: relative;
+  width: 100%;
+}
+
+.topo-tabs__nav {
+  position: relative;
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 2px solid var(--color-border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.topo-tabs__nav::-webkit-scrollbar {
+  display: none;
+}
+
+.topo-tabs__tab {
+  padding: var(--space-3) var(--space-5);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  background: none;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color var(--transition-fast);
+}
+
+.topo-tabs__tab:hover {
+  color: var(--color-text);
+}
+
+.topo-tabs__tab.is-active {
+  color: var(--color-accent);
+  font-weight: var(--weight-bold);
+}
+
+.topo-tabs__indicator {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  height: 2px;
+  background-color: var(--color-accent);
+  transition: left var(--transition-base), width var(--transition-base);
+}
+</style>
+
+<script>
+function initTabs() {
+  const container = document.getElementById("topo-tabs-component");
+  if (!container) return;
+
+  const tabs = container.querySelectorAll<HTMLButtonElement>('[role="tab"]');
+  const indicator = container.querySelector<HTMLElement>("#tabs-indicator");
+
+  function moveIndicator(activeTab: HTMLButtonElement) {
+    if (!indicator) return;
+    indicator.style.left = `${activeTab.offsetLeft}px`;
+    indicator.style.width = `${activeTab.offsetWidth}px`;
+  }
+
+  const firstActive = container.querySelector<HTMLButtonElement>('.topo-tabs__tab.is-active');
+  if (firstActive) moveIndicator(firstActive);
+
+  tabs.forEach((tab, index) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => {
+        t.setAttribute("aria-selected", "false");
+        t.setAttribute("tabindex", "-1");
+        t.classList.remove("is-active");
+      });
+
+      tab.setAttribute("aria-selected", "true");
+      tab.setAttribute("tabindex", "0");
+      tab.classList.add("is-active");
+      moveIndicator(tab);
+
+      // Déclencher un événement personnalisé
+      const tabId = tab.dataset.tabId;
+      if (tabId) {
+        container.dispatchEvent(new CustomEvent("tab-changed", { detail: { tabId } }));
+      }
+    });
+
+    // Navigation au clavier (flèches droite / gauche)
+    tab.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const next = tabs[(index + 1) % tabs.length];
+        next.focus();
+        next.click();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const prev = tabs[(index - 1 + tabs.length) % tabs.length];
+        prev.focus();
+        prev.click();
+      }
+    });
+  });
+}
+
+initTabs();
+document.addEventListener("astro:page-load", initTabs);
+</script>
