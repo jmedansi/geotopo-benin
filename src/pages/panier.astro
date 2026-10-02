@@ -1,7 +1,6 @@
 ---
 /**
  * src/pages/panier.astro — Page Panier Ultra-Luxe & Envoi WhatsApp.
- * Conforme à la spec PROMPT 5 & §6 bis du guide.
  */
 
 import Base from "../layouts/Base.astro";
@@ -51,8 +50,8 @@ packs.forEach((p) => {
 ---
 
 <Base
-  title="Mon Panier d'Équipements"
-  description="Consultez et validez votre panier de matériel topographique. Envoi direct de votre demande de commande par WhatsApp."
+  title="Mon Panier d'Équipements — GéoTopo Bénin"
+  description="Consultez et validez votre panier de matériel topographique. Envoi direct de votre commande par WhatsApp."
 >
   <ScrollProgress />
   <Crosshair />
@@ -65,10 +64,10 @@ packs.forEach((p) => {
       <Breadcrumbs items={[{ label: "Panier" }]} />
 
       <div class="cart-header" data-reveal="up">
-        <span class="cart-header__eyebrow">COMMANDE & DEVIS</span>
-        <h1 class="cart-header__title">Votre Panier de Matériel</h1>
+        <span class="cart-header__eyebrow">COMMANDE & DEVIS EN DIRECT</span>
+        <h1 class="cart-header__title">Votre Panier de Matériel Topographique</h1>
         <p class="cart-header__subtitle">
-          Vérifiez vos équipements sélectionnés ci-dessous. Votre commande sera transmise directement à notre équipe technique sur WhatsApp sans paiement en ligne.
+          Vérifiez vos équipements sélectionnés ci-dessous. Votre commande sera transmise directement à notre équipe technique sur WhatsApp (<strong>+229 61 57 27 66</strong>) pour établir votre facture proforma et planifier la remise avec formation offerte.
         </p>
       </div>
 
@@ -76,7 +75,7 @@ packs.forEach((p) => {
       <div class="cart-empty-state" id="cart-empty" style="display: none;">
         <div class="cart-empty-card" data-reveal="up">
           <div class="cart-empty-icon">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="#FF6B00" stroke-width="1.5">
               <circle cx="12" cy="12" r="10" stroke-dasharray="4 2"></circle>
               <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path>
               <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -89,10 +88,10 @@ packs.forEach((p) => {
           </p>
           <div class="cart-empty-actions">
             <a href="/boutique" class="btn btn--accent btn--lg">
-              🔍 Explorer la boutique
+              🔍 Explorer le catalogue boutique
             </a>
             <a href="/packs" class="btn btn--outline btn--lg">
-              📦 Voir nos packs complets
+              📦 Découvrir nos packs brigade
             </a>
           </div>
         </div>
@@ -103,14 +102,17 @@ packs.forEach((p) => {
         <!-- Colonne Gauche : Liste des articles -->
         <div class="cart-items-col">
           <div class="cart-items-header">
-            <span class="cart-items-count-label">Articles dans la commande :</span>
-            <button type="button" class="btn-text-danger" id="cart-clear-btn">
+            <div class="cart-items-count-badge">
+              <span>Articles sélectionnés :</span>
+              <strong id="cart-items-badge-num">0</strong>
+            </div>
+            <button type="button" class="btn-text-danger" id="cart-clear-btn" title="Vider l'ensemble du panier">
               🗑️ Vider le panier
             </button>
           </div>
 
           <div class="cart-items-list" id="cart-items-list">
-            <!-- Injecté en JS -->
+            <!-- Injecté en JS avec carte ultra-premium -->
           </div>
         </div>
 
@@ -121,11 +123,11 @@ packs.forEach((p) => {
 
             <div class="cart-summary-lines">
               <div class="summary-line">
-                <span>Total références :</span>
+                <span>Références distinctes :</span>
                 <strong id="sum-items-count">0</strong>
               </div>
               <div class="summary-line">
-                <span>Total unités :</span>
+                <span>Total unités de matériel :</span>
                 <strong id="sum-total-qty">0</strong>
               </div>
               <div class="summary-line summary-line--subtotal">
@@ -145,7 +147,7 @@ packs.forEach((p) => {
               <textarea
                 id="cart-notes-input"
                 class="cart-notes-textarea"
-                placeholder="Ex: Besoin d'une facture proforma, livraison sur chantier à Parakou, demande de rallonge..."
+                placeholder="Ex: Demande de proforma officielle, livraison urgente sur chantier à Parakou ou Cotonou, ajout de trépied supplémentaire..."
                 rows="3"
               ></textarea>
             </div>
@@ -161,11 +163,11 @@ packs.forEach((p) => {
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984 0 1.764.459 3.48 1.333 4.993l-1.416 5.176 5.297-1.389c1.458.796 3.104 1.216 4.773 1.217h.004c5.505 0 9.988-4.478 9.989-9.985 0-2.668-1.038-5.176-2.924-7.063-1.886-1.887-4.393-2.925-7.066-2.925zm0 1.667c4.586 0 8.322 3.737 8.323 8.322 0 4.586-3.737 8.323-8.324 8.323-1.488 0-2.946-.395-4.223-1.144l-.303-.179-3.137.822.837-3.056-.197-.314a8.275 8.275 0 01-1.298-4.453c0-4.585 3.738-8.321 8.322-8.321z"/>
                 </svg>
-                <span>Envoyer la commande sur WhatsApp</span>
+                <span>Commander sur WhatsApp (+229 61 57 27 66)</span>
               </button>
 
               <p class="cart-disclaimer">
-                🤝 En cliquant sur ce bouton, votre liste d'articles sera automatiquement formatée et ouverte dans WhatsApp pour finaliser les modalités avec notre conseiller.
+                🤝 En cliquant sur ce bouton, votre panier sera formaté et transmis directement sur WhatsApp au <strong>+229 61 57 27 66</strong>. Aucun paiement en ligne requis.
               </p>
             </div>
           </div>
@@ -178,78 +180,84 @@ packs.forEach((p) => {
 <style>
 .cart-header {
   margin-block: var(--space-4) var(--space-8);
-  max-width: 720px;
+  max-width: 780px;
 }
 
 .cart-header__eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  font-weight: var(--weight-bold);
-  color: var(--color-accent);
-  letter-spacing: var(--tracking-widest);
+  font-family: var(--font-mono, monospace);
+  font-size: var(--text-xs, 12px);
+  font-weight: 700;
+  color: #FF6B00;
+  letter-spacing: 0.1em;
 }
 
 .cart-header__title {
-  font-family: var(--font-serif);
-  font-size: var(--text-4xl);
-  font-weight: var(--weight-bold);
+  font-family: var(--font-serif, Georgia, serif);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 800;
   color: #FFFFFF;
-  margin-block: var(--space-2);
+  margin-block: 10px 14px;
 }
 
 .cart-header__subtitle {
-  font-size: var(--text-base);
+  font-size: var(--text-base, 1rem);
   color: #E2E8F0;
-  line-height: var(--leading-relaxed);
+  line-height: 1.7;
+}
+
+.cart-header__subtitle strong {
+  color: #FF6B00;
 }
 
 /* Empty State */
 .cart-empty-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-12) var(--space-6);
+  background: rgba(18, 24, 38, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 60px 24px;
   text-align: center;
-  max-width: 600px;
-  margin: var(--space-8) auto;
+  max-width: 620px;
+  margin: 40px auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 .cart-empty-icon {
-  margin-bottom: var(--space-4);
+  margin-bottom: 20px;
   display: flex;
   justify-content: center;
 }
 
 .cart-empty-title {
   font-family: var(--font-serif);
-  font-size: var(--text-2xl);
+  font-size: 1.8rem;
   color: #FFFFFF;
-  margin-bottom: var(--space-2);
+  margin-bottom: 12px;
 }
 
 .cart-empty-text {
-  font-size: var(--text-sm);
-  color: #E2E8F0;
-  margin-bottom: var(--space-6);
+  font-size: 1rem;
+  color: #CBD5E1;
+  margin-bottom: 28px;
 }
 
 .cart-empty-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: 16px;
   justify-content: center;
 }
 
 /* Filled Layout */
 .cart-content-layout {
   display: grid;
-  grid-template-columns: 1fr 360px;
-  gap: var(--space-8);
+  grid-template-columns: 1fr 380px;
+  gap: 32px;
   align-items: start;
-  margin-bottom: var(--space-16);
+  margin-bottom: 80px;
 }
 
-@media (max-width: 992px) {
+@media (max-width: 1024px) {
   .cart-content-layout {
     grid-template-columns: 1fr;
   }
@@ -259,165 +267,220 @@ packs.forEach((p) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: var(--space-4);
-  border-bottom: 1px solid var(--color-border);
-  margin-bottom: var(--space-6);
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  margin-bottom: 24px;
 }
 
-.cart-items-count-label {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: var(--color-text-dim);
+.cart-items-count-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: #94A3B8;
   text-transform: uppercase;
-  letter-spacing: var(--tracking-wider);
+  letter-spacing: 0.05em;
+}
+
+.cart-items-count-badge strong {
+  background: rgba(255, 107, 0, 0.15);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  color: #FF6B00;
+  padding: 2px 10px;
+  border-radius: 20px;
 }
 
 .btn-text-danger {
   background: none;
   border: none;
   color: #FF4D4D;
-  font-size: var(--text-xs);
-  font-family: var(--font-mono);
+  font-size: 13px;
+  font-family: var(--font-sans);
+  font-weight: 600;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }
 
 .btn-text-danger:hover {
-  background-color: rgba(255, 77, 77, 0.1);
+  background-color: rgba(255, 77, 77, 0.15);
+  color: #FF6666;
 }
 
 .cart-items-list {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 20px;
 }
 
-/* Single Cart Row Item */
+/* Carte d'élément Panier Ultra-Luxe */
 .cart-item-card {
   display: grid;
-  grid-template-columns: 90px 1fr auto auto;
-  gap: var(--space-4);
+  grid-template-columns: 100px 1fr auto auto auto;
+  gap: 20px;
   align-items: center;
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  transition: all var(--transition-fast);
-}
-
-@media (max-width: 640px) {
-  .cart-item-card {
-    grid-template-columns: 70px 1fr;
-    grid-template-rows: auto auto;
-  }
+  background: rgba(18, 24, 38, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 20px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
 .cart-item-card:hover {
   border-color: rgba(255, 107, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(255, 107, 0, 0.1);
+  background: rgba(22, 30, 48, 0.95);
+}
+
+@media (max-width: 768px) {
+  .cart-item-card {
+    grid-template-columns: 80px 1fr auto;
+    grid-template-areas:
+      "img info remove"
+      "controls controls controls";
+    gap: 16px;
+    padding: 16px;
+  }
+  .cart-item-img {
+    grid-area: img;
+  }
+  .cart-item-info {
+    grid-area: info;
+  }
+  .btn-remove-item {
+    grid-area: remove;
+    justify-self: end;
+  }
+  .cart-item-mobile-row {
+    grid-area: controls;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding-top: 14px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+  }
 }
 
 .cart-item-img {
-  width: 90px;
-  height: 90px;
+  width: 100px;
+  height: 100px;
   object-fit: cover;
-  border-radius: var(--radius-md);
-  background-color: var(--color-bg-alt);
-}
-
-@media (max-width: 640px) {
-  .cart-item-img {
-    width: 70px;
-    height: 70px;
-  }
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: #0B0E14;
 }
 
 .cart-item-info {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
-.cart-item-type-badge {
+.cart-item-badge {
   align-self: flex-start;
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: var(--weight-bold);
-  padding: 2px 6px;
-  border-radius: var(--radius-sm);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 6px;
   text-transform: uppercase;
 }
 
-.cart-item-type-badge--produit {
-  background-color: rgba(0, 229, 255, 0.15);
-  color: var(--color-cyan);
+.cart-item-badge--produit {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00E5FF;
+  border: 1px solid rgba(0, 229, 255, 0.3);
 }
 
-.cart-item-type-badge--pack {
-  background-color: rgba(255, 107, 0, 0.15);
-  color: var(--color-accent);
+.cart-item-badge--pack {
+  background: rgba(255, 107, 0, 0.15);
+  color: #FF6B00;
+  border: 1px solid rgba(255, 107, 0, 0.3);
 }
 
 .cart-item-title {
   font-family: var(--font-serif);
-  font-size: var(--text-base);
-  font-weight: var(--weight-bold);
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #FFFFFF;
   text-decoration: none;
-  line-height: 1.3;
+  line-height: 1.35;
+  transition: color 0.2s ease;
 }
 
 .cart-item-title:hover {
-  color: var(--color-accent);
+  color: #FF6B00;
 }
 
 .cart-item-unit-price {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  color: #E2E8F0;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  color: #94A3B8;
 }
 
-/* Quantity Control */
-.cart-item-qty-control {
+/* Contrôle de Quantité Réactif & Ergonomique */
+.cart-item-qty-wrapper {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: 4px;
-  background-color: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: 2px;
+}
+
+.cart-item-qty-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.cart-item-qty-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: rgba(11, 14, 20, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  padding: 3px;
 }
 
 .qty-btn {
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  border: none;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #FFFFFF;
-  font-size: 16px;
+  font-size: 18px;
+  font-weight: 700;
   cursor: pointer;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--transition-fast);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  user-select: none;
 }
 
 .qty-btn:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  color: var(--color-accent);
+  background: #FF6B00;
+  color: #FFFFFF;
+  border-color: #FF6B00;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
 }
 
 .qty-input {
-  width: 40px;
+  width: 46px;
   text-align: center;
-  background: none;
+  background: transparent;
   border: none;
   color: #FFFFFF;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  font-family: var(--font-mono, monospace);
+  font-size: 16px;
+  font-weight: 800;
   -moz-appearance: textfield;
 }
 
@@ -427,177 +490,195 @@ packs.forEach((p) => {
   margin: 0;
 }
 
+/* Total de ligne */
 .cart-item-line-total {
   text-align: right;
-  min-width: 110px;
+  min-width: 140px;
+}
+
+.line-total-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #64748B;
+  text-transform: uppercase;
+  display: block;
 }
 
 .line-total-val {
   display: block;
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  font-weight: var(--weight-bold);
+  font-family: var(--font-mono, monospace);
+  font-size: 1.1rem;
+  font-weight: 800;
   color: #FFFFFF;
 }
 
 .line-total-val.is-devis {
-  color: var(--color-cyan);
+  color: #00E5FF;
 }
 
 .btn-remove-item {
-  background: none;
-  border: none;
-  color: var(--color-text-dim);
-  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 77, 77, 0.1);
+  border: 1px solid rgba(255, 77, 77, 0.2);
+  color: #FF4D4D;
+  font-size: 16px;
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
-  transition: color var(--transition-fast);
+  border-radius: 10px;
+  transition: all 0.2s ease;
 }
 
 .btn-remove-item:hover {
-  color: #FF4D4D;
+  background: #FF4D4D;
+  color: #FFFFFF;
+  border-color: #FF4D4D;
+  box-shadow: 0 0 12px rgba(255, 77, 77, 0.4);
 }
 
 /* Summary Card */
 .cart-summary-card {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  background: rgba(18, 24, 38, 0.9);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 28px;
   position: sticky;
-  top: calc(var(--header-height) + 24px);
+  top: 100px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
 }
 
 .cart-summary-title {
   font-family: var(--font-serif);
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  font-size: 1.4rem;
+  font-weight: 800;
   color: #FFFFFF;
-  margin-bottom: var(--space-4);
-  padding-bottom: var(--space-3);
-  border-bottom: 1px solid var(--color-border);
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cart-summary-lines {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  margin-bottom: var(--space-6);
+  gap: 14px;
+  margin-bottom: 24px;
 }
 
 .summary-line {
   display: flex;
   justify-content: space-between;
-  font-size: var(--text-sm);
-  color: #E2E8F0;
+  font-size: 0.95rem;
+  color: #CBD5E1;
 }
 
 .summary-line--subtotal {
-  padding-top: var(--space-3);
-  border-top: 1px dashed var(--color-border);
-  font-size: var(--text-base);
-}
-
-.summary-subtotal-val {
-  font-family: var(--font-mono);
-  font-size: var(--text-xl);
-  font-weight: var(--weight-bold);
+  padding-top: 16px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.15);
+  font-size: 1.1rem;
   color: #FFFFFF;
 }
 
-.summary-devis-notice {
-  font-size: var(--text-xs);
-  color: var(--color-cyan);
-  background-color: rgba(0, 229, 255, 0.08);
-  border: 1px solid rgba(0, 229, 255, 0.2);
-  border-radius: var(--radius-md);
-  padding: var(--space-2) var(--space-3);
-  margin-top: var(--space-2);
+.summary-subtotal-val {
+  font-family: var(--font-mono, monospace);
+  font-size: 1.25rem;
+  color: #FF6B00;
+  font-weight: 800;
+}
+
+.summary-devis-count {
+  background: rgba(0, 229, 255, 0.1);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  color: #00E5FF;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .cart-notes-group {
-  margin-bottom: var(--space-6);
+  margin-bottom: 24px;
 }
 
 .cart-notes-label {
   display: block;
-  font-size: var(--text-xs);
-  color: #E2E8F0;
-  margin-bottom: var(--space-2);
+  font-size: 13px;
+  color: #CBD5E1;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
 .cart-notes-textarea {
   width: 100%;
-  background-color: var(--color-bg-alt);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  padding: var(--space-3);
+  background: #0B0E14;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px;
   color: #FFFFFF;
   font-family: var(--font-sans);
-  font-size: var(--text-sm);
+  font-size: 13px;
   resize: vertical;
+  transition: border-color 0.2s ease;
 }
 
 .cart-notes-textarea:focus {
   outline: none;
-  border-color: var(--color-accent);
+  border-color: #FF6B00;
 }
 
 .cart-limit-alert {
-  background-color: rgba(255, 77, 77, 0.15);
+  background: rgba(255, 77, 77, 0.15);
   border: 1px solid #FF4D4D;
-  color: #FF4D4D;
-  padding: var(--space-3);
-  border-radius: var(--radius-md);
-  font-size: var(--text-xs);
-  margin-bottom: var(--space-4);
-}
-
-.cart-cta-box {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+  color: #FF6666;
+  padding: 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-bottom: 20px;
 }
 
 .btn-whatsapp-submit {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 12px;
   width: 100%;
-  padding: var(--space-4) var(--space-4);
-  background-color: #25D366;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
   color: #FFFFFF;
-  border: none;
-  border-radius: var(--radius-lg);
   font-family: var(--font-sans);
-  font-size: var(--text-base);
-  font-weight: var(--weight-bold);
+  font-size: 1.05rem;
+  font-weight: 700;
+  border-radius: 14px;
+  border: none;
   cursor: pointer;
-  transition: all var(--transition-fast);
-  box-shadow: 0 4px 16px rgba(37, 211, 102, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 8px 25px rgba(37, 211, 102, 0.3);
 }
 
 .btn-whatsapp-submit:hover {
-  background-color: #20bd5a;
-  box-shadow: 0 6px 20px rgba(37, 211, 102, 0.5);
   transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(37, 211, 102, 0.45);
+  background: linear-gradient(135deg, #28E16D 0%, #15A090 100%);
 }
 
 .cart-disclaimer {
-  font-size: 11px;
-  color: var(--color-text-dim);
-  line-height: var(--leading-relaxed);
+  font-size: 12px;
+  color: #94A3B8;
+  line-height: 1.5;
+  margin-top: 14px;
   text-align: center;
+}
+
+.cart-disclaimer strong {
+  color: #FFFFFF;
 }
 </style>
 
 <script>
   import { getCart, updateCartQty, removeFromCart, clearCart, MAX_CART_ITEMS } from "../lib/cart";
-  import { site } from "../config/site";
 
-  // Formateur de prix FCFA
   function formatPrice(val?: number): string {
     if (val === undefined || val === null) return "Sur devis";
     return val.toLocaleString("fr-FR").replace(/\s/g, " ") + " FCFA";
@@ -622,6 +703,7 @@ packs.forEach((p) => {
     const contentContainer = document.getElementById("cart-content");
     const listContainer = document.getElementById("cart-items-list");
     const limitAlert = document.getElementById("cart-limit-alert");
+    const badgeNum = document.getElementById("cart-items-badge-num");
 
     if (!emptyContainer || !contentContainer || !listContainer) return;
 
@@ -634,7 +716,8 @@ packs.forEach((p) => {
     emptyContainer.style.display = "none";
     contentContainer.style.display = "grid";
 
-    // Vérification de la limite de 25 références
+    if (badgeNum) badgeNum.textContent = String(cart.length);
+
     if (limitAlert) {
       limitAlert.style.display = cart.length >= MAX_CART_ITEMS ? "block" : "none";
     }
@@ -643,61 +726,96 @@ packs.forEach((p) => {
     let subtotal = 0;
     let devisCount = 0;
 
-    // Vider le conteneur de liste
     listContainer.innerHTML = "";
+
+    const isMobile = window.innerWidth <= 768;
 
     cart.forEach((item) => {
       const key = `${item.type}:${item.slug}`;
       const itemData = catalogMap[key];
 
-      if (!itemData) return; // Si l'article n'existe plus dans le catalogue
+      if (!itemData) return;
 
       totalQty += item.qty;
       const isDevis = itemData.price === undefined || itemData.price === null;
-      
+
       if (isDevis) {
         devisCount += item.qty;
       } else {
         subtotal += itemData.price! * item.qty;
       }
 
-      // Créer la carte d'élément du panier
       const card = document.createElement("div");
       card.className = "cart-item-card";
 
       const formattedUnit = isDevis ? "Sur devis" : formatPrice(itemData.price);
       const formattedTotal = isDevis ? "Sur devis" : formatPrice(itemData.price! * item.qty);
 
-      card.innerHTML = `
-        <img src="${itemData.cover}" alt="${itemData.title}" class="cart-item-img" width="90" height="90" loading="lazy" />
-        
-        <div class="cart-item-info">
-          <span class="cart-item-type-badge cart-item-type-badge--${itemData.type}">
-            ${itemData.type === "pack" ? "Pack Compléte" : "Produit"}
-          </span>
-          <a href="${itemData.url}" class="cart-item-title">${itemData.title}</a>
-          <span class="cart-item-unit-price">${formattedUnit} / unité</span>
-        </div>
+      if (isMobile) {
+        card.innerHTML = `
+          <img src="${itemData.cover}" alt="${itemData.title}" class="cart-item-img" width="80" height="80" loading="lazy" />
+          
+          <div class="cart-item-info">
+            <span class="cart-item-badge cart-item-badge--${itemData.type}">
+              ${itemData.type === "pack" ? "📦 Pack Complete" : "🎯 Équipement"}
+            </span>
+            <a href="${itemData.url}" class="cart-item-title">${itemData.title}</a>
+            <span class="cart-item-unit-price">${formattedUnit} / unité</span>
+          </div>
 
-        <div class="cart-item-qty-control">
-          <button type="button" class="qty-btn btn-minus" data-slug="${item.slug}" data-type="${item.type}">-</button>
-          <input type="number" class="qty-input" value="${item.qty}" min="1" max="99" data-slug="${item.slug}" data-type="${item.type}" aria-label="Quantité" />
-          <button type="button" class="qty-btn btn-plus" data-slug="${item.slug}" data-type="${item.type}">+</button>
-        </div>
+          <button type="button" class="btn-remove-item" data-slug="${item.slug}" data-type="${item.type}" title="Supprimer">
+            ✕
+          </button>
 
-        <div class="cart-item-line-total">
-          <span class="line-total-val ${isDevis ? "is-devis" : ""}">${formattedTotal}</span>
-        </div>
+          <div class="cart-item-mobile-row">
+            <div class="cart-item-qty-control">
+              <button type="button" class="qty-btn btn-minus" data-slug="${item.slug}" data-type="${item.type}">-</button>
+              <input type="number" class="qty-input" value="${item.qty}" min="1" max="99" data-slug="${item.slug}" data-type="${item.type}" aria-label="Quantité" />
+              <button type="button" class="qty-btn btn-plus" data-slug="${item.slug}" data-type="${item.type}">+</button>
+            </div>
 
-        <button type="button" class="btn-remove-item" data-slug="${item.slug}" data-type="${item.type}" title="Supprimer de la commande">
-          ✕
-        </button>
-      `;
+            <div class="cart-item-line-total">
+              <span class="line-total-label">Total :</span>
+              <span class="line-total-val ${isDevis ? "is-devis" : ""}">${formattedTotal}</span>
+            </div>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <img src="${itemData.cover}" alt="${itemData.title}" class="cart-item-img" width="100" height="100" loading="lazy" />
+          
+          <div class="cart-item-info">
+            <span class="cart-item-badge cart-item-badge--${itemData.type}">
+              ${itemData.type === "pack" ? "📦 Pack Complete" : "🎯 Équipement"}
+            </span>
+            <a href="${itemData.url}" class="cart-item-title">${itemData.title}</a>
+            <span class="cart-item-unit-price">${formattedUnit} / unité</span>
+          </div>
+
+          <div class="cart-item-qty-wrapper">
+            <span class="cart-item-qty-label">Quantité</span>
+            <div class="cart-item-qty-control">
+              <button type="button" class="qty-btn btn-minus" data-slug="${item.slug}" data-type="${item.type}">-</button>
+              <input type="number" class="qty-input" value="${item.qty}" min="1" max="99" data-slug="${item.slug}" data-type="${item.type}" aria-label="Quantité" />
+              <button type="button" class="qty-btn btn-plus" data-slug="${item.slug}" data-type="${item.type}">+</button>
+            </div>
+          </div>
+
+          <div class="cart-item-line-total">
+            <span class="line-total-label">Montant Total</span>
+            <span class="line-total-val ${isDevis ? "is-devis" : ""}">${formattedTotal}</span>
+          </div>
+
+          <button type="button" class="btn-remove-item" data-slug="${item.slug}" data-type="${item.type}" title="Supprimer de la commande">
+            ✕
+          </button>
+        `;
+      }
 
       listContainer.appendChild(card);
     });
 
-    // Mise à jour des totaux dans le récapitulatif
+    // Totaux récapitulatif
     const countEl = document.getElementById("sum-items-count");
     const totalQtyEl = document.getElementById("sum-total-qty");
     const subtotalEl = document.getElementById("sum-subtotal-val");
@@ -717,12 +835,10 @@ packs.forEach((p) => {
       }
     }
 
-    // Wiring des événements sur la liste
-    attachCartEventListeners(catalogMap);
+    attachCartEventListeners();
   }
 
-  function attachCartEventListeners(catalogMap: any) {
-    // Boutons - (décrémenter)
+  function attachCartEventListeners() {
     document.querySelectorAll(".btn-minus").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const target = e.currentTarget as HTMLElement;
@@ -736,7 +852,6 @@ packs.forEach((p) => {
       });
     });
 
-    // Boutons + (incrémenter)
     document.querySelectorAll(".btn-plus").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const target = e.currentTarget as HTMLElement;
@@ -750,7 +865,6 @@ packs.forEach((p) => {
       });
     });
 
-    // Saisie directe de quantité
     document.querySelectorAll(".qty-input").forEach((input) => {
       input.addEventListener("change", (e) => {
         const target = e.target as HTMLInputElement;
@@ -765,7 +879,6 @@ packs.forEach((p) => {
       });
     });
 
-    // Suppression d'un article
     document.querySelectorAll(".btn-remove-item").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         const target = e.currentTarget as HTMLElement;
@@ -776,14 +889,13 @@ packs.forEach((p) => {
     });
   }
 
-  // Vider le panier complet
   document.getElementById("cart-clear-btn")?.addEventListener("click", () => {
     if (confirm("Êtes-vous sûr de vouloir vider l'ensemble de votre panier ?")) {
       clearCart();
     }
   });
 
-  // Soumission WhatsApp Génératrice
+  // Envoi WhatsApp avec le numéro officiel +22961572766
   document.getElementById("cart-whatsapp-submit")?.addEventListener("click", () => {
     const rawCatalogData = document.getElementById("catalog-data")?.textContent;
     if (!rawCatalogData) return;
@@ -812,21 +924,20 @@ packs.forEach((p) => {
 
     const notesInput = (document.getElementById("cart-notes-input") as HTMLTextAreaElement)?.value.trim();
 
-    // Formattage du message WhatsApp strict du guide (§6 bis)
-    let message = `Bonjour, je souhaite passer commande sur ${site.name} :\n\n`;
+    let message = `Bonjour GéoTopo Bénin, je souhaite passer commande des équipements suivants :\n\n`;
     message += lines.join("\n");
-    message += `\n\nTotal indicatif ${hasDevisItems ? "(hors sur devis)" : ""} : ${formatPrice(totalSubtotal)}`;
+    message += `\n\nTotal indicatif ${hasDevisItems ? "(hors articles sur devis)" : ""} : ${formatPrice(totalSubtotal)}`;
 
     if (notesInput) {
-      message += `\n\nRemarques : ${notesInput}`;
+      message += `\n\nConsignes / Remarques : ${notesInput}`;
     }
 
-    const waUrl = `https://wa.me/${site.whatsapp}?text=${encodeURIComponent(message)}`;
+    const waUrl = `https://wa.me/22961572766?text=${encodeURIComponent(message)}`;
     window.open(waUrl, "_blank");
   });
 
-  // Écouteurs globaux
   document.addEventListener("DOMContentLoaded", renderCartPage);
   document.addEventListener("astro:page-load", renderCartPage);
   window.addEventListener("panier-mis-a-jour", renderCartPage);
+  window.addEventListener("resize", renderCartPage);
 </script>

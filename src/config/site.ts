@@ -21,10 +21,10 @@ export const site = {
     "Stations Totales, Récepteurs GNSS RTK, Niveaux de Précision, Lasers, Drones Photogrammétriques et Accessoires. Nous importons directement auprès des fabricants mondiaux (FOIF, Leica, South, CHCNAV, Sokkia, DJI) et livrons votre matériel étalonné sur base géodésique avec garantie 1 an et formation offerte.",
 
   /** Numéro WhatsApp au format international sans + ni espaces */
-  whatsapp: "22997000000",
+  whatsapp: "22961572766",
 
   /** Téléphone affiché sur la page contact */
-  phone: "+229 97 00 00 00",
+  phone: "+229 61 57 27 66",
 
   /** Adresse physique */
   address: "Rue des Géomètres, Cotonou, Bénin",
