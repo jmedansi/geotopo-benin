@@ -1,39 +1,16 @@
 ---
 /**
- * Gallery.astro — Galerie d'images d'un produit.
- *
- * Image principale 4/3 et bande de vignettes. Toutes les images sont
- * empilées et une seule porte la classe « is-current » : le passage
- * d'une vue à l'autre se fait par fondu, sans rechargement ni cadre
- * vide (ce qu'aurait donné un simple changement de src sur une seule
- * balise <img>).
- *
- * Le zoom passe par Lightbox.astro, un composant séparé. La galerie
- * se contente d'émettre window « lightbox:ouvrir » : les deux ne se
- * connaissent pas.
- *
- * Sans JavaScript, l'image de couverture reste visible — c'est la
- * première balise et la seule marquée « is-current » dans le HTML.
+ * Gallery.astro — Galerie d'images interactive & responsive.
  */
 
 import { Image } from "astro:assets";
 import type { ImageMetadata } from "astro";
-import Lightbox from "./Lightbox.astro";
 
 interface Props {
-  /** Image de couverture, affichée par défaut. */
   cover: ImageMetadata;
-  /** Images complémentaires. */
   gallery?: ImageMetadata[];
-  /** Titre du produit, utilisé pour les textes alternatifs. */
   title: string;
-  /**
-   * Identifiant unique de la galerie dans la page. Il est transmis à la
-   * visionneuse et à l'événement d'ouverture : deux galeries sur la
-   * même page s'ouvrent alors chacune leur propre visionneuse.
-   */
   id: string;
-  /** Chargement prioritaire, pour l'image principale d'une fiche. */
   eager?: boolean;
 }
 
@@ -41,17 +18,9 @@ const { cover, gallery = [], title, id, eager = false } = Astro.props;
 
 const allImages = [cover, ...gallery];
 
-/** Textes alternatifs : le titre seul pour la couverture, le reste numéroté. */
 function altFor(index: number): string {
   return index === 0 ? title : `${title} — vue ${index + 1}`;
 }
-
-// La visionneuse travaille sur des <img> simples : on lui passe les URL
-// déjà optimisées par astro:assets, et non les fichiers originaux.
-const lightboxImages = allImages.map((image, index) => ({
-  src: image.src,
-  alt: altFor(index),
-}));
 
 const SIZES = "(min-width: 1024px) 56vw, 100vw";
 ---
@@ -62,29 +31,31 @@ const SIZES = "(min-width: 1024px) 56vw, 100vw";
       <Image
         class={`gallery__img ${index === 0 ? "is-current" : ""}`}
         data-gallery-img
+        data-index={String(index)}
+        data-src={image.src}
+        data-alt={altFor(index)}
         src={image}
         alt={altFor(index)}
         widths={[400, 800, 1200]}
         sizes={SIZES}
         loading={index === 0 && eager ? "eager" : "lazy"}
         decoding="async"
+        style={index === 0 ? "opacity: 1; z-index: 5; pointer-events: auto;" : "opacity: 0; z-index: 1; pointer-events: none;"}
       />
     ))}
 
-    {/*
-      Cible unique qui reçoit le zoom. Elle passe au-dessus pour rester
-      atteignable au clavier et porter le clic ; l'image en dessous
-      n'a plus besoin d'être elle-même cliquable.
-    */}
     <button
       type="button"
       class="gallery__zoom"
       data-gallery-open
+      data-lightbox-src={cover.src}
+      data-lightbox-alt={altFor(0)}
       aria-label={`Agrandir les photos de ${title}`}
+      title="Agrandir l'image"
     >
       <svg
-        width="20"
-        height="20"
+        width="22"
+        height="22"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -92,7 +63,6 @@ const SIZES = "(min-width: 1024px) 56vw, 100vw";
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"
-        focusable="false"
       >
         <circle cx="11" cy="11" r="7" />
         <path d="m20 20-3.5-3.5" />
@@ -112,7 +82,7 @@ const SIZES = "(min-width: 1024px) 56vw, 100vw";
             data-gallery-thumb
             data-index={String(index)}
             aria-pressed={index === 0 ? "true" : "false"}
-            aria-label={`Voir la vue ${index + 1} sur ${allImages.length}`}
+            aria-label={`Voir l'image ${index + 1} sur ${allImages.length}`}
           >
             <Image
               src={image}
@@ -129,174 +99,186 @@ const SIZES = "(min-width: 1024px) 56vw, 100vw";
   )}
 </div>
 
-<Lightbox images={lightboxImages} title={title} id={id} />
-
 <style>
-  .gallery {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 100%;
+}
 
-  .gallery__main {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    background-color: var(--color-surface-alt);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
+.gallery__main {
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  background-color: #121722;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+}
 
-  .gallery__img {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    opacity: 0;
-    transition: opacity var(--dur-fast) linear;
-  }
+.gallery__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s ease;
+}
 
-  .gallery__img.is-current {
-    opacity: 1;
-  }
+.gallery__img.is-current {
+  opacity: 1 !important;
+  z-index: 5 !important;
+  pointer-events: auto !important;
+}
 
-  .gallery__zoom {
-    position: absolute;
-    right: var(--space-3);
-    bottom: var(--space-3);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 44px;
-    height: 44px;
-    border-radius: var(--radius-full);
-    color: var(--color-text);
-    background-color: rgb(255 255 255 / 0.92);
-    box-shadow: var(--shadow-md);
-    transition: background-color var(--transition-fast), transform var(--transition-fast);
-  }
+.gallery__zoom {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  color: #FFFFFF;
+  background: rgba(11, 14, 20, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-  .gallery__zoom:hover {
-    background-color: var(--color-surface);
-    transform: scale(1.06);
-  }
+.gallery__zoom:hover {
+  background: #FF6B00;
+  color: #FFFFFF;
+  border-color: #FF6B00;
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(255, 107, 0, 0.4);
+}
 
-  .gallery__thumbs {
-    display: flex;
-    gap: var(--space-2);
-    overflow-x: auto;
-    padding-bottom: var(--space-2);
-    scroll-snap-type: x proximity;
-    scrollbar-width: thin;
-  }
+.gallery__thumbs {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  max-width: 100%;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 107, 0, 0.4) transparent;
+}
 
-  .gallery__thumbs li {
-    flex: none;
-    scroll-snap-align: start;
-  }
+.gallery__thumbs::-webkit-scrollbar {
+  height: 6px;
+}
+.gallery__thumbs::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 0, 0.4);
+  border-radius: 4px;
+}
 
-  .gallery__thumb {
-    display: block;
-    width: 84px;
-    height: 63px;
-    padding: 0;
-    border: 2px solid transparent;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    background-color: var(--color-surface-alt);
-    opacity: 0.62;
-    transition: opacity var(--transition-fast), border-color var(--transition-fast);
-  }
+.gallery__thumbs li {
+  flex: none;
+  scroll-snap-align: start;
+}
 
-  .gallery__thumb :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+.gallery__thumb {
+  display: block;
+  width: 90px;
+  height: 68px;
+  padding: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #121722;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-  .gallery__thumb:hover {
-    opacity: 1;
-  }
+.gallery__thumb :global(img) {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
-  .gallery__thumb.is-active {
-    opacity: 1;
-    border-color: var(--color-accent);
-  }
+.gallery__thumb:hover {
+  opacity: 0.9;
+  border-color: rgba(255, 107, 0, 0.5);
+}
+
+.gallery__thumb.is-active {
+  opacity: 1;
+  border-color: #FF6B00;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
+}
 </style>
 
 <script>
-  /**
-   * Gallery — changement de vue et ouverture de la visionneuse.
-   *
-   * Un seul script pour toutes les galeries : elles sont recherchées à
-   * chaque navigation, car un script bundlé ne s'exécute qu'une fois.
-   */
-  function initGalleries(): void {
-    const galleries = document.querySelectorAll<HTMLElement>("[data-gallery]");
+function initGalleries(): void {
+  const galleries = document.querySelectorAll<HTMLElement>("[data-gallery]");
 
-    galleries.forEach((gallery) => {
-      if (gallery.dataset.initialized === "true") return;
-      gallery.dataset.initialized = "true";
+  galleries.forEach((gallery) => {
+    const images = Array.from(gallery.querySelectorAll<HTMLElement>("[data-gallery-img]"));
+    const thumbs = Array.from(gallery.querySelectorAll<HTMLButtonElement>("[data-gallery-thumb]"));
+    const openBtn = gallery.querySelector<HTMLButtonElement>("[data-gallery-open]");
 
-      const images = Array.from(
-        gallery.querySelectorAll<HTMLElement>("[data-gallery-img]")
-      );
-      const thumbs = Array.from(
-        gallery.querySelectorAll<HTMLButtonElement>("[data-gallery-thumb]")
-      );
-      const openBtn = gallery.querySelector<HTMLButtonElement>("[data-gallery-open]");
-      if (images.length === 0) return;
+    if (images.length === 0) return;
+    if (gallery.dataset.ready === "true") return;
+    gallery.dataset.ready = "true";
 
-      // Identifiant porté par l'événement : il doit correspondre à celui
-      // de la visionneuse rendue à côté, sinon rien ne s'ouvre.
-      const galleryId = gallery.dataset.galleryId;
-      if (!galleryId) return;
+    let currentIndex = 0;
 
-      let index = 0;
+    const show = (next: number): void => {
+      currentIndex = next;
 
-      const show = (next: number): void => {
-        index = next;
-
-        thumbs.forEach((thumb, i) => {
-          const active = i === index;
-          thumb.classList.toggle("is-active", active);
-          thumb.setAttribute("aria-pressed", active ? "true" : "false");
-        });
-
-        images.forEach((image, i) => {
-          image.classList.toggle("is-current", i === index);
-        });
-      };
-
+      // Met à jour les vignettes
       thumbs.forEach((thumb, i) => {
-        thumb.addEventListener("click", () => show(i));
+        const active = i === currentIndex;
+        thumb.classList.toggle("is-active", active);
+        thumb.setAttribute("aria-pressed", active ? "true" : "false");
       });
 
-      openBtn?.addEventListener("click", () => {
-        window.dispatchEvent(
-          new CustomEvent("lightbox:ouvrir", { detail: { id: galleryId, index } })
-        );
+      // Met à jour l'image principale
+      images.forEach((img, i) => {
+        const isCurrent = i === currentIndex;
+        img.classList.toggle("is-current", isCurrent);
+        if (isCurrent) {
+          img.style.opacity = "1";
+          img.style.zIndex = "5";
+          img.style.pointerEvents = "auto";
+          // Met à jour les métadonnées du bouton zoom
+          if (openBtn) {
+            const src = img.dataset.src || img.getAttribute("src") || "";
+            const alt = img.dataset.alt || img.getAttribute("alt") || "";
+            openBtn.setAttribute("data-lightbox-src", src);
+            openBtn.setAttribute("data-lightbox-alt", alt);
+          }
+        } else {
+          img.style.opacity = "0";
+          img.style.zIndex = "1";
+          img.style.pointerEvents = "none";
+        }
       });
+    };
 
-      // Flèches au clavier dans la bande de vignettes.
-      gallery.addEventListener("keydown", (event) => {
-        if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
-        if (!(event.target as HTMLElement).matches("[data-gallery-thumb]")) return;
-
-        event.preventDefault();
-        const delta = event.key === "ArrowRight" ? 1 : -1;
-        const next = Math.min(Math.max(index + delta, 0), thumbs.length - 1);
-        show(next);
-        thumbs[next].focus();
+    thumbs.forEach((thumb, i) => {
+      thumb.addEventListener("click", (e) => {
+        e.preventDefault();
+        show(i);
       });
-
-      show(0);
     });
-  }
 
-  initGalleries();
-  document.addEventListener("astro:page-load", initGalleries);
+    show(0);
+  });
+}
+
+initGalleries();
+document.addEventListener("astro:page-load", initGalleries);
 </script>

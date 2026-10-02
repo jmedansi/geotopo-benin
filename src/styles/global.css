@@ -16,6 +16,9 @@ html {
   text-size-adjust: 100%;
   background-color: var(--color-bg);
   color: #FFFFFF;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 body {
@@ -28,6 +31,9 @@ body {
   -moz-osx-font-smoothing: grayscale;
   min-height: 100dvh;
   overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
+  position: relative;
 }
 
 /* Quadrillage de fond discret et sobre */
@@ -83,9 +89,11 @@ input, textarea, select {
    ---------------------------------------------------------- */
 
 .container {
-  width: min(var(--container-max), 94vw);
+  width: 100%;
+  max-width: var(--container-max, 1280px);
   margin-inline: auto;
-  padding-inline: var(--container-padding);
+  padding-inline: clamp(16px, 4vw, 32px);
+  box-sizing: border-box;
 }
 
 
