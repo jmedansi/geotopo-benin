@@ -1,6 +1,6 @@
 ---
 /**
- * Accordion.astro — Composant FAQ / Accordéon interactif accessible.
+ * Accordion.astro — FAQ / Accordéon Premium UI/UX Pro Max.
  */
 
 interface Item {
@@ -18,7 +18,7 @@ const { items, class: extraClass = "" } = Astro.props;
 
 <div class={`topo-accordion ${extraClass}`.trim()}>
   {items.map((item, idx) => (
-    <div class="topo-accordion__item">
+    <div class="topo-accordion__item" id={`acc-item-${idx}`}>
       <button
         type="button"
         class="topo-accordion__button"
@@ -26,17 +26,23 @@ const { items, class: extraClass = "" } = Astro.props;
         aria-expanded="false"
         aria-controls={`acc-panel-${idx}`}
       >
-        <span class="topo-accordion__question">{item.q}</span>
-        <svg class="topo-accordion__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+        <span class="topo-accordion__question">
+          <span class="topo-accordion__q-badge">Q</span>
+          {item.q}
+        </span>
+        <div class="topo-accordion__icon-wrapper">
+          <svg class="topo-accordion__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
       </button>
+
       <div
         id={`acc-panel-${idx}`}
         class="topo-accordion__panel"
         role="region"
         aria-labelledby={`acc-btn-${idx}`}
-        hidden
+        style="display: none;"
       >
         <div class="topo-accordion__content">
           <p>{item.a}</p>
@@ -50,100 +56,188 @@ const { items, class: extraClass = "" } = Astro.props;
 .topo-accordion {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
-  max-width: 800px;
+  gap: 16px;
+  width: 100%;
+  max-width: 860px;
   margin-inline: auto;
 }
 
 .topo-accordion__item {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
+  background: rgba(18, 24, 38, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
   overflow: hidden;
-  transition: border-color var(--transition-fast);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.topo-accordion__item:hover {
+  border-color: rgba(255, 107, 0, 0.3);
+  background: rgba(22, 30, 48, 0.85);
+  box-shadow: 0 6px 24px rgba(255, 107, 0, 0.08);
+}
+
+.topo-accordion__item.is-open {
+  border-color: rgba(255, 107, 0, 0.6);
+  background: rgba(24, 33, 52, 0.95);
+  box-shadow: 0 8px 32px rgba(255, 107, 0, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .topo-accordion__button {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
+  gap: 16px;
   width: 100%;
-  padding: var(--space-4) var(--space-6);
+  padding: 20px 24px;
   text-align: left;
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  font-weight: var(--weight-semibold);
-  color: var(--color-text);
-  background: none;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #F1F5F9;
+  background: transparent;
   border: none;
   cursor: pointer;
-  min-height: 52px;
+  transition: color 0.2s ease;
+  user-select: none;
 }
 
 .topo-accordion__button:hover {
-  background-color: var(--color-surface-hover);
-  color: var(--color-accent);
+  color: #FFFFFF;
 }
 
-.topo-accordion__icon {
+.topo-accordion__question {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  line-height: 1.4;
+}
+
+.topo-accordion__q-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: rgba(255, 107, 0, 0.15);
+  border: 1px solid rgba(255, 107, 0, 0.3);
+  color: #FF6B00;
+  font-family: var(--font-mono, monospace);
+  font-size: 13px;
+  font-weight: 700;
   flex-shrink: 0;
-  transition: transform var(--transition-base);
+  transition: all 0.3s ease;
 }
 
-.topo-accordion__button[aria-expanded="true"] .topo-accordion__icon {
+.topo-accordion__item.is-open .topo-accordion__q-badge {
+  background: #FF6B00;
+  color: #FFFFFF;
+  border-color: #FF6B00;
+  box-shadow: 0 0 12px rgba(255, 107, 0, 0.4);
+}
+
+.topo-accordion__icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94A3B8;
+  flex-shrink: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.topo-accordion__button:hover .topo-accordion__icon-wrapper {
+  background: rgba(255, 107, 0, 0.15);
+  color: #FF6B00;
+  border-color: rgba(255, 107, 0, 0.4);
+}
+
+.topo-accordion__item.is-open .topo-accordion__icon-wrapper {
+  background: rgba(255, 107, 0, 0.2);
+  color: #FF6B00;
+  border-color: rgba(255, 107, 0, 0.5);
   transform: rotate(180deg);
-  color: var(--color-accent);
 }
 
 .topo-accordion__panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows var(--transition-base);
-}
-
-.topo-accordion__panel:not([hidden]) {
-  display: grid;
-  grid-template-rows: 1fr;
+  padding: 0 24px 22px 66px;
 }
 
 .topo-accordion__content {
-  overflow: hidden;
-  padding-inline: var(--space-6);
-  padding-bottom: var(--space-4);
-  font-size: var(--text-sm);
-  color: var(--color-text-muted);
-  line-height: var(--leading-relaxed);
+  font-size: 0.98rem;
+  color: #CBD5E1;
+  line-height: 1.7;
+  border-top: 1px dashed rgba(255, 255, 255, 0.08);
+  padding-top: 16px;
+}
+
+.topo-accordion__content p {
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .topo-accordion__button {
+    padding: 16px 18px;
+    font-size: 0.95rem;
+  }
+  .topo-accordion__panel {
+    padding: 0 18px 18px 18px;
+  }
+  .topo-accordion__q-badge {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
 }
 </style>
 
 <script>
-function initAccordions() {
-  const buttons = document.querySelectorAll<HTMLButtonElement>(".topo-accordion__button");
+function setupAccordions() {
+  const items = document.querySelectorAll(".topo-accordion__item");
 
-  buttons.forEach((btn) => {
-    if (btn.dataset.accInit) return;
-    btn.dataset.accInit = "true";
+  items.forEach((item) => {
+    const btn = item.querySelector(".topo-accordion__button");
+    const panel = item.querySelector(".topo-accordion__panel") as HTMLElement | null;
+
+    if (!btn || !panel) return;
+    if (btn.hasAttribute("data-ready")) return;
+    btn.setAttribute("data-ready", "true");
 
     btn.addEventListener("click", () => {
-      const isExpanded = btn.getAttribute("aria-expanded") === "true";
-      const panelId = btn.getAttribute("aria-controls");
-      if (!panelId) return;
+      const isOpen = item.classList.contains("is-open");
 
-      const panel = document.getElementById(panelId);
-      if (!panel) return;
+      // Fermer tous les autres accordéons
+      items.forEach((otherItem) => {
+        if (otherItem !== item) {
+          otherItem.classList.remove("is-open");
+          const otherBtn = otherItem.querySelector(".topo-accordion__button");
+          const otherPanel = otherItem.querySelector(".topo-accordion__panel") as HTMLElement | null;
+          if (otherBtn) otherBtn.setAttribute("aria-expanded", "false");
+          if (otherPanel) otherPanel.style.display = "none";
+        }
+      });
 
-      if (isExpanded) {
+      // Basculer l'élément courant
+      if (isOpen) {
+        item.classList.remove("is-open");
         btn.setAttribute("aria-expanded", "false");
-        panel.setAttribute("hidden", "");
+        panel.style.display = "none";
       } else {
+        item.classList.add("is-open");
         btn.setAttribute("aria-expanded", "true");
-        panel.removeAttribute("hidden");
+        panel.style.display = "block";
       }
     });
   });
 }
 
-initAccordions();
-document.addEventListener("astro:page-load", initAccordions);
+setupAccordions();
+document.addEventListener("astro:page-load", setupAccordions);
 </script>
