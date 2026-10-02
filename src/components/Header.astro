@@ -387,6 +387,22 @@ function isActive(href: string): boolean {
 .skip-link:focus {
   transform: translateY(0);
 }
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 998;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(2px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-base);
+}
+
+.mobile-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
 </style>
 
 <script>
@@ -408,8 +424,68 @@ function isActive(href: string): boolean {
     }
   }
 
-  document.addEventListener("DOMContentLoaded", updateHeaderCartCount);
-  document.addEventListener("astro:page-load", updateHeaderCartCount);
+  function initBurgerMenu() {
+    const burger = document.getElementById("burger-btn");
+    const menu = document.getElementById("menu-mobile");
+    const overlay = document.getElementById("mobile-overlay");
+    const header = document.getElementById("site-header");
+
+    if (!burger || !menu || !overlay) return;
+    // Avoid double-binding on Astro view transitions
+    if ((burger as any)._burgerReady) return;
+    (burger as any)._burgerReady = true;
+
+    const open = () => {
+      menu.removeAttribute("hidden");
+      overlay.classList.add("is-visible");
+      burger.setAttribute("aria-expanded", "true");
+      burger.setAttribute("aria-label", "Fermer le menu");
+      document.body.style.overflow = "hidden";
+    };
+
+    const close = () => {
+      menu.setAttribute("hidden", "");
+      overlay.classList.remove("is-visible");
+      burger.setAttribute("aria-expanded", "false");
+      burger.setAttribute("aria-label", "Ouvrir le menu");
+      document.body.style.overflow = "";
+    };
+
+    burger.addEventListener("click", () => {
+      const isOpen = burger.getAttribute("aria-expanded") === "true";
+      isOpen ? close() : open();
+    });
+
+    overlay.addEventListener("click", close);
+
+    // Close when a menu link is clicked
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", close);
+    });
+
+    // Close on Escape
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") close();
+    });
+
+    // Scroll — add is-scrolled class to header
+    if (header) {
+      const onScroll = () => {
+        header.classList.toggle("is-scrolled", window.scrollY > 30);
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      onScroll();
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    updateHeaderCartCount();
+    initBurgerMenu();
+  });
+  document.addEventListener("astro:page-load", () => {
+    updateHeaderCartCount();
+    initBurgerMenu();
+  });
   window.addEventListener("panier-mis-a-jour", updateHeaderCartCount);
 </script>
 

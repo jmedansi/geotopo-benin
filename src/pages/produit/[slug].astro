@@ -131,7 +131,7 @@ const jsonLd = {
       <div class="product-grid-layout">
         <!-- Colonne Gauche : Galerie + Vidéos -->
         <div class="product-media-col" data-reveal="up">
-          <Gallery cover={cover} gallery={gallery} title={title} />
+          <Gallery cover={cover} gallery={gallery} title={title} id={product.id} />
         </div>
 
         <!-- Colonne Droite : Infos & Achat sticky -->
@@ -403,10 +403,11 @@ const jsonLd = {
 
 .product-price-val {
   font-family: var(--font-mono);
-  font-size: var(--text-4xl);
+  font-size: clamp(1.5rem, 6vw, var(--text-4xl));
   font-weight: var(--weight-bold);
   color: var(--color-accent);
   display: block;
+  word-break: break-word;
 }
 
 .product-price-val.is-devis {
@@ -589,6 +590,19 @@ const jsonLd = {
 
 .specs-table td {
   color: #FFFFFF;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .specs-table th,
+  .specs-table td {
+    padding: var(--space-3) var(--space-4);
+    font-size: 12px;
+  }
+  .specs-table th {
+    width: 40%;
+  }
 }
 
 .sticky-mobile-bar {
@@ -605,6 +619,15 @@ const jsonLd = {
   align-items: center;
   justify-content: space-between;
   box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* Give page body room above sticky bar on mobile */
+@media (max-width: 767px) {
+  .product-page {
+    padding-bottom: 90px;
+  }
 }
 
 @media (min-width: 768px) {
