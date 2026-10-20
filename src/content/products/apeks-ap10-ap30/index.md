@@ -8,10 +8,10 @@ gallery:
   - "./cover.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "Disponible"
-price: 2750000
-featured: false
+availability: "sur-commande"
+leadTime: "En stock à cotonou"
+price: 3750000
+featured: true
 order: 16
 highlights:
   - value: "1408"

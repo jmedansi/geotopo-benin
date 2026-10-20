@@ -8,9 +8,9 @@ gallery:
   - "./1.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "Disponible immédiatement à Cotonou"
-price: 3200000
+availability: "sur-commande"
+leadTime: "3 Semaines"
+price: 4200000
 featured: true
 order: 3
 highlights:

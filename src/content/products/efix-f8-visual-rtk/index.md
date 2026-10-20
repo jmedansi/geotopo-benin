@@ -9,8 +9,8 @@ gallery:
 youtube:
   - "dQw4w9WgXcQ"
 availability: "en-boutique"
-leadTime: "Disponible immédiatement"
-price: 3850000
+leadTime: "3 Semaines"
+price: 5000000
 featured: true
 order: 1
 highlights:

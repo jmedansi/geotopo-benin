@@ -8,9 +8,9 @@ gallery:
   - "./1.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "En stock"
-price: 2850000
+availability: "sur-commande"
+leadTime: "3 Semaines"
+price: 3850000
 featured: false
 order: 10
 highlights:

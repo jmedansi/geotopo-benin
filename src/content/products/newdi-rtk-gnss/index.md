@@ -10,9 +10,9 @@ gallery:
   - "./3.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
+availability: "sur-commande"
 leadTime: "En stock"
-price: 2600000
+price: 4600000
 featured: false
 order: 17
 highlights:

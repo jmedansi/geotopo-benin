@@ -8,9 +8,9 @@ gallery:
   - "./1.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "En stock à Cotonou"
-price: 3450000
+availability: "sur-commande"
+leadTime: "3 Semaines"
+price: 3150000
 featured: false
 order: 4
 highlights:

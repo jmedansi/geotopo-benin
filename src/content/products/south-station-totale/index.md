@@ -10,7 +10,7 @@ youtube:
   - "dQw4w9WgXcQ"
 availability: "en-boutique"
 leadTime: "En stock"
-price: 2400000
+price: 2600000
 featured: false
 order: 18
 highlights:

@@ -11,8 +11,8 @@ gallery:
   - "./4.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "En stock à Cotonou"
+availability: "sur-commande"
+leadTime: "sur commande"
 price: 4950000
 featured: true
 order: 15

@@ -9,8 +9,8 @@ gallery:
 youtube:
   - "dQw4w9WgXcQ"
 availability: "en-boutique"
-leadTime: "En stock"
-price: 380000
+leadTime: "En stock à cotonou"
+price: 510000
 featured: false
 order: 14
 highlights:

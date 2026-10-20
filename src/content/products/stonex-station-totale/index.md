@@ -10,8 +10,8 @@ gallery:
   - "./3.webp"
 youtube:
   - "dQw4w9WgXcQ"
-availability: "en-boutique"
-leadTime: "En stock"
+availability: "sur-commande"
+leadTime: "3 Semaines"
 price: 2800000
 featured: false
 order: 12

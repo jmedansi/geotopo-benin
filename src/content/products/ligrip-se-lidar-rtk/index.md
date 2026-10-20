@@ -13,8 +13,8 @@ gallery:
 youtube:
   - "dQw4w9WgXcQ"
 availability: "sur-commande"
-leadTime: "Expédié sous 5 à 7 jours"
-price: 12500000
+leadTime: "3 Semaines"
+price: 10500000
 featured: true
 order: 2
 highlights:
