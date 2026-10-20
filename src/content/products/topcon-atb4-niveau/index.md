@@ -4,8 +4,6 @@ category: "niveaux"
 brand: "Topcon"
 summary: "Niveau automatique de chantier Topcon AT-B4A étanche IPX6 ultra-robuste avec compensateur magnétique."
 cover: "./cover.webp"
-gallery:
-  - "./cover.webp"
 youtube:
   - "dQw4w9WgXcQ"
 availability: "en-boutique"

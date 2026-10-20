@@ -1,5 +1,5 @@
 {
-  "name": "boutique-benin",
+  "name": "geotopo",
   "type": "module",
   "version": "0.0.1",
   "engines": {
@@ -13,11 +13,20 @@
     "astro": "astro",
     "new:product": "node scripts/new-product.mjs",
     "new:guide": "node scripts/new-guide.mjs",
-    "placeholders": "node scripts/generate-placeholders.mjs"
+    "placeholders": "node scripts/generate-placeholders.mjs",
+    "sheet:export": "node scripts/sheet-export.mjs",
+    "sheet:push": "node scripts/sheet-export.mjs --remote",
+    "sheet:pull": "node scripts/sheet-pull.mjs",
+    "sheet:import": "node scripts/sheet-import.mjs",
+    "sheet:simulate": "node scripts/sheet-import.mjs --dry-run",
+    "sheet:test": "node scripts/sheet-test.mjs",
+    "media:import": "node scripts/media-import.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",
     "astro": "^7.3.5",
+    "exceljs": "^4.4.0",
+    "google-auth-library": "^11.1.0",
     "motion": "^13.5.0",
     "sharp": "^0.33.5"
   },

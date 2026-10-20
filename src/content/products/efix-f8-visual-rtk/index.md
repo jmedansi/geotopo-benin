@@ -4,8 +4,6 @@ category: "gnss-gps"
 brand: "EFIX / CHCNAV"
 summary: "Récepteur GNSS RTK révolutionnaire à double caméra intégrée pour le levé visuel et la photogrammétrie 3D directe."
 cover: "./cover.webp"
-gallery:
-  - "./cover.webp"
 youtube:
   - "dQw4w9WgXcQ"
 availability: "en-boutique"
