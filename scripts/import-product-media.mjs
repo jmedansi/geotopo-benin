@@ -73,8 +73,8 @@ const PLAN = {
   "unistrong-g970ii-pro": [
     P(UNISTRONG, "WhatsApp Image 2026-09-28 at 22.37.03.jpeg"),
     P(UNISTRONG, "WhatsApp Image 2026-09-28 at 22.38.19.jpeg"),
-    "Gnss de marque Unistrong G970.jpeg",
   ],
+  "unistrong-g970": ["Gnss de marque Unistrong G970.jpeg"],
   "foif-a90-rtk": [
     P(FOIF, "WhatsApp Image 2026-09-28 at 23.15.49.jpeg"),
     P(FOIF, "WhatsApp Image 2026-09-28 at 23.15.49 (1).jpeg"),
@@ -129,8 +129,9 @@ const PLAN = {
   "station-totale-apeks": [P(APEKS_STATION, "WhatsApp Image 2026-09-28 at 22.42.34.jpeg")],
 };
 
+// Hi-Target : les 3 photos du ZIP « Gnss de marque HI TARGET.zip » ont été
+// extraites pour la fiche `hitarget-gnss-rtk` (hors plan automatique).
 const SKIPPED = [
-  ["Gnss de HI TARGET.zip", "marque absente du catalogue"],
   ["Station total de marque RUIDE/RUIDE RCS _RTS-822R10m.pdf", "fiche technique PDF (non intégrée)"],
   ["Global version EFIX F8 visual RTK +IMU + dual cameras/WhatsApp Video 2026-09-28 at 22.34.10.mp4", "vidéo (traitée séparément)"],
   ["Gnss de marque NEWDI/WhatsApp Video 2026-09-28 at 22.59.26.mp4", "vidéo (traitée séparément)"],

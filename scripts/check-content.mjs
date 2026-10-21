@@ -17,7 +17,7 @@ const C = join(root, "src", "content");
 /* Attentes du PROMPT 0 ---------------------------------------------------- */
 const EXPECTED = {
   categories: 6,
-  products: 23,
+  products: 25,
   packs: 3,
   guides: 3,
   minWithRelated: 5,
