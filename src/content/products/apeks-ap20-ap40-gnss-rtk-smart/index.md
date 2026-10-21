@@ -33,7 +33,7 @@ specs:
 price: 4100000
 related: []
 featured: true
-order: 0
+order: 19
 draft: false
 ---
 

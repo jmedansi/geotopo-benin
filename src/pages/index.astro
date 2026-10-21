@@ -15,7 +15,7 @@ import ScrollProgress from "../components/ScrollProgress.astro";
 import { site } from "../config/site";
 import { getFeaturedProducts, getPacks, getProducts } from "../lib/catalog";
 
-const featuredProducts = await getFeaturedProducts(6);
+const featuredProducts = await getFeaturedProducts(8);
 const packs = await getPacks();
 const allProducts = await getProducts();
 
@@ -124,7 +124,7 @@ const testimonials = [
     <div class="container">
       <div class="stats-grid">
         <div class="stat-item" data-anim="fade-up" style="--delay:0s">
-          <div class="stat-num" data-count="18">0</div>
+          <div class="stat-num" data-count={allProducts.length}>0</div>
           <div class="stat-suffix">+ références</div>
           <div class="stat-label">d'équipements certifiés usine en catalogue</div>
         </div>
@@ -162,7 +162,7 @@ const testimonials = [
       </div>
       <div class="section__cta-center" data-anim="fade-up" style="--delay:.2s">
         <a href="/boutique" class="btn-outline-glow">
-          Explorer les 18 équipements du catalogue &rarr;
+          Explorer les {allProducts.length} équipements du catalogue &rarr;
         </a>
       </div>
     </div>

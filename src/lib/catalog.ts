@@ -40,9 +40,13 @@ export async function getProductBySlug(slug: string): Promise<ProductEntry | und
   return (await getVisibleProducts()).find((p) => p.id === slug);
 }
 
-export async function getFeaturedProducts(limit = 6): Promise<ProductEntry[]> {
+export async function getFeaturedProducts(limit = 8): Promise<ProductEntry[]> {
   const all = await getVisibleProducts();
-  return all.filter((p) => p.data.featured).slice(0, limit);
+  const featured = all.filter((p) => p.data.featured);
+  const others = all.filter((p) => !p.data.featured);
+  // Toujours servir `limit` produits : on complète avec le reste du catalogue
+  // si le client a mis moins de 8 références en vedette.
+  return [...featured, ...others].slice(0, limit);
 }
 
 export async function getProductsByCategory(slug: string): Promise<ProductEntry[]> {

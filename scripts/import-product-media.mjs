@@ -47,6 +47,9 @@ const PLAN = {
   "efix-f8-visual-rtk": [P(EFIX, "WhatsApp Image 2026-09-28 at 22.36.21.jpeg")],
   "apeks-ap10-ap30": ["Gnss APEKS AP10+AP30.jpeg"],
   "chcnav-rtk-gnss": [P(CHC, "Gnss de marque CHC NAV.jpeg")],
+  "pilotnav-p10-p10": ["Gnss de marque PILOTNAV model  P10+P10.jpeg"],
+  "qiansun-gnss-rtk": ["Gnss de marque QIANSUN.jpeg"],
+  "tersus-gnss-rtk": ["Gnss de marque TERSUS.jpeg"],
   "newdi-rtk-gnss": [
     P(NEWDI, "WhatsApp Image 2026-09-28 at 22.59.23.jpeg"),
     P(NEWDI, "WhatsApp Image 2026-09-28 at 22.59.23 (1).jpeg"),
@@ -127,9 +130,6 @@ const PLAN = {
 };
 
 const SKIPPED = [
-  ["Gnss de marque PILOTNAV model  P10+P10.jpeg", "marque absente du catalogue"],
-  ["Gnss de marque QIANSUN.jpeg", "marque absente du catalogue"],
-  ["Gnss de marque TERSUS.jpeg", "GNSS Tersus absent du catalogue (seule la station existe)"],
   ["Gnss de HI TARGET.zip", "marque absente du catalogue"],
   ["Station total de marque RUIDE/RUIDE RCS _RTS-822R10m.pdf", "fiche technique PDF (non intégrée)"],
   ["Global version EFIX F8 visual RTK +IMU + dual cameras/WhatsApp Video 2026-09-28 at 22.34.10.mp4", "vidéo (traitée séparément)"],
