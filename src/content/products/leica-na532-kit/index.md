@@ -7,10 +7,6 @@ cover: "./cover.webp"
 gallery:
   - "./1.webp"
   - "./2.webp"
-  - "./3.webp"
-  - "./4.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "en-boutique"
 leadTime: "En stock à Cotonou"
 price: 450000

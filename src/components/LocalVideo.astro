@@ -1,0 +1,55 @@
+---
+/**
+ * LocalVideo.astro — Lecteur vidéo natif pour les fichiers hébergés sur le
+ * site (`public/media/...`), sans iframe ni cookie tiers.
+ */
+
+interface Props {
+  /** Chemin public du fichier, ex. "/media/ruide/demo.mp4" */
+  src: string;
+  /** Titre accessible */
+  title?: string;
+  /** Image d'attente (couverture produit) */
+  poster?: string;
+}
+
+const { src, title = "Vidéo de démonstration", poster } = Astro.props;
+---
+
+<figure class="local-video">
+  <video
+    controls
+    preload="metadata"
+    playsinline
+    poster={poster}
+    aria-label={title}
+  >
+    <source src={src} type="video/mp4" />
+    Votre navigateur ne prend pas en charge la lecture vidéo HTML5.
+  </video>
+  <figcaption>{title}</figcaption>
+</figure>
+
+<style>
+.local-video {
+  margin: 0 0 var(--space-5);
+  background: #000000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.local-video video {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  background: #000000;
+}
+
+.local-video figcaption {
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-text-muted);
+  background: var(--color-surface, #FFFFFF);
+}
+</style>

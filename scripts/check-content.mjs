@@ -224,7 +224,17 @@ for (const slug of listDirs(prodDir)) {
       fail(`produit ${slug} : identifiant YouTube mal formé « ${id} »`);
     }
   }
-  if (listOf(raw, "youtube").length) withVideo++;
+  const localVideos = listOf(raw, "videos");
+  for (const src of localVideos) {
+    if (!src.startsWith("/media/")) {
+      fail(`produit ${slug} : vidéo locale hors /media/ → ${src}`);
+      continue;
+    }
+    if (!existsSync(join(root, "public", src.replace(/^\//, "")))) {
+      fail(`produit ${slug} : vidéo locale manquante → ${src}`);
+    }
+  }
+  if (listOf(raw, "youtube").length || localVideos.length) withVideo++;
 
   const price = scalar(raw, "price");
   if (price !== undefined) {
@@ -264,7 +274,7 @@ if (prodSlugs.size !== EXPECTED.products) {
 
 for (const [label, actual, min] of [
   ["related", withRelated, EXPECTED.minWithRelated],
-  ["vidéo YouTube", withVideo, EXPECTED.minWithVideo],
+  ["vidéo (locale ou YouTube)", withVideo, EXPECTED.minWithVideo],
   ["featured", featured, EXPECTED.minFeatured],
 ]) {
   if (actual < min) fail(`au moins ${min} produits doivent définir « ${label} » (actuel ${actual})`);

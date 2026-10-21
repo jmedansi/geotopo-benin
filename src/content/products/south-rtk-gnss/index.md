@@ -6,8 +6,6 @@ summary: "Le couteau suisse du géomètre : récepteur SOUTH éprouvé sur tous 
 cover: "./cover.webp"
 gallery:
   - "./1.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 3850000

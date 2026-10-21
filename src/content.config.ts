@@ -48,6 +48,7 @@ const products = defineCollection({
       cover: image(),
       gallery: z.array(image()).optional(),
       youtube: z.array(z.string()).optional(),
+      videos: z.array(z.string()).optional(),
       availability: z.enum(["en-boutique", "sur-commande"]),
       leadTime: z.string().optional(),
       features: z.array(z.string()).default([]),

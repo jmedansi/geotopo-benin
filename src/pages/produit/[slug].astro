@@ -12,6 +12,7 @@ import Breadcrumbs from "../../components/Breadcrumbs.astro";
 import Gallery from "../../components/Gallery.astro";
 import Lightbox from "../../components/Lightbox.astro";
 import YouTubeEmbed from "../../components/YouTubeEmbed.astro";
+import LocalVideo from "../../components/LocalVideo.astro";
 import ProductCard from "../../components/ProductCard.astro";
 import AddToCart from "../../components/AddToCart.astro";
 import WhatsAppButton from "../../components/WhatsAppButton.astro";
@@ -42,6 +43,7 @@ const {
   cover,
   gallery = [],
   youtube = [],
+  videos = [],
   availability,
   leadTime,
   features = [],
@@ -78,7 +80,9 @@ const questionMessage = `Bonjour, j'ai une question concernant le produit : ${ti
 const productTabs = [
   { id: "desc", label: "Description" },
   { id: "specs", label: "Spécifications" },
-  ...(youtube.length > 0 ? [{ id: "videos", label: "Vidéos" }] : []),
+  ...(youtube.length > 0 || videos.length > 0
+    ? [{ id: "videos", label: "Vidéos" }]
+    : []),
   { id: "livraison", label: "Livraison & Garantie" },
 ];
 
@@ -276,12 +280,19 @@ const jsonLd = {
           )}
 
           <!-- Panel Vidéos -->
-          {youtube.length > 0 && (
+          {(youtube.length > 0 || videos.length > 0) && (
             <div id="panel-videos" class="tab-panel" style="display: none;">
               <h3 style="font-family: var(--font-serif); font-size: var(--text-xl); margin-bottom: var(--space-4); color: #FFFFFF;">
                 Démonstrations et vidéos
               </h3>
-              <div style="max-width: 700px;">
+              <div style="max-width: 760px;">
+                {videos.map((src, index) => (
+                  <LocalVideo
+                    src={src}
+                    title={`${title} — démonstration ${videos.length > 1 ? index + 1 : ""}`.trim()}
+                    poster={cover.src}
+                  />
+                ))}
                 {youtube.map((ytId) => (
                   <YouTubeEmbed videoId={ytId} title={`Vidéo ${title}`} />
                 ))}

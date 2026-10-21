@@ -9,8 +9,6 @@ gallery:
   - "./2.webp"
   - "./3.webp"
   - "./4.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "sur commande"
 price: 4950000
@@ -49,6 +47,8 @@ related:
   - "efix-f8-visual-rtk"
   - "unistrong-g970ii-pro"
   - "sinognss-t10-plus-t70-pro"
+videos:
+  - "/media/pack-brigade-gnss-complet/demo.mp4"
 ---
 
 ### Le Pack Brigade RTK Master Terrain : Autonomie Maximale

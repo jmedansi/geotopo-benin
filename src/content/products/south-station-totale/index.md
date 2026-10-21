@@ -4,8 +4,6 @@ category: "stations-totales"
 brand: "SOUTH"
 summary: "Station totale South NTS-332R reconnue pour sa rapidité de mesure sans prisme et son étanchéité."
 cover: "./cover.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "en-boutique"
 leadTime: "En stock"
 price: 2600000

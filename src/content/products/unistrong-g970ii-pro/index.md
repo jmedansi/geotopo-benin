@@ -6,8 +6,7 @@ summary: "Récepteur GNSS RTK d'élite avec 1408 canaux, inclinaison IMU 60°, c
 cover: "./cover.webp"
 gallery:
   - "./1.webp"
-youtube:
-  - "dQw4w9WgXcQ"
+  - "./2.webp"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 4200000

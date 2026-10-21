@@ -9,8 +9,6 @@ gallery:
   - "./2.webp"
   - "./3.webp"
   - "./4.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "en-boutique"
 leadTime: "En stock à Cotonou"
 price: 2450000
@@ -49,6 +47,9 @@ related:
   - "chcnav-station-totale"
   - "stonex-station-totale"
   - "tersus-station-totale"
+videos:
+  - "/media/ruide-rcs-rts822/demo.mp4"
+  - "/media/ruide-rcs-rts822/presentation.mp4"
 ---
 
 ### La Station Totale RUIDE RCS/RTS-822 : Puissance & Ergonomie

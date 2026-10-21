@@ -4,8 +4,6 @@ category: "gnss-gps"
 brand: "EFIX / CHCNAV"
 summary: "Récepteur GNSS RTK révolutionnaire à double caméra intégrée pour le levé visuel et la photogrammétrie 3D directe."
 cover: "./cover.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "en-boutique"
 leadTime: "3 Semaines"
 price: 5000000
@@ -44,6 +42,8 @@ related:
   - "unistrong-g970ii-pro"
   - "sinognss-t10-plus-t70-pro"
   - "chcnav-rtk-gnss"
+videos:
+  - "/media/efix-f8-visual-rtk/demo.mp4"
 ---
 
 ### Présentation de l'EFIX F8 Visual RTK

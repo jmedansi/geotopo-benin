@@ -4,8 +4,6 @@ category: "gnss-gps"
 brand: "CHCNAV"
 summary: "Le GNSS RTK le plus populaire en Afrique de l'Ouest, alimenté par le moteur iStar pour une précision sous couvert végétal."
 cover: "./cover.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 3300000

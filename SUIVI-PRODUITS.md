@@ -31,6 +31,9 @@ sheet:push                  → l'onglet Produits reflète l'état réel du site
 | `npm run media:import` | Importe les photos Drive et les vidéos YouTube déclarées dans la feuille |
 | `npm run media:import -- --remote` | Lit et réécrit la feuille Google (médias) |
 | `npm run media:import -- --dry-run` | Simulation des médias : rien n'est écrit |
+| `npm run media:local` | Importe une **livraison locale** (photos déjà copiées sur le poste) |
+| `npm run media:local:dry` | Simulation de la livraison locale |
+| `npm run media:local -- --only=<slug>` | Ne traite qu'un produit |
 
 Options utiles : `--no-check` (saute `npm run check`), `-- <chemin.xlsx>` (autre fichier).
 
@@ -131,6 +134,36 @@ Traitement automatique :
 Un produit **sans `Référence`** (ligne neuve pas encore importée) est
 ignoré : lancer d'abord `sheet:import`, puis `media:import`.
 
+### Livraison locale et vidéos hébergées
+
+Quand le client remet un dossier de photos/vidéos (par exemple
+`D:\Geotopo\Produits`), l'import passe par un **plan explicite** dans
+`scripts/import-product-media.mjs` : chaque produit reçoit la liste ordonnée
+de ses sources, la première devenant la couverture. Le script applique la
+même conversion WebP que `media:import` et réécrit `cover` + `gallery`.
+
+```sh
+npm run media:local:dry
+npm run media:local
+npm run media:local -- --only=ligrip-se-lidar-rtk
+```
+
+Les vidéos de la livraison sont compressées avec `ffmpeg` dans
+`public/media/<slug>/` (H.264/AAC, `faststart`, 1280 px max) puis déclarées
+dans le frontmatter :
+
+```yaml
+videos:
+  - "/media/ruide-rcs-rts822/demo.mp4"
+```
+
+Le composant `LocalVideo.astro` les affiche dans l'onglet « Vidéos » avec la
+couverture produit en poster ; aucun compte YouTube n'est nécessaire.
+`check-content.mjs` vérifie que chaque chemin commence par `/media/` et que
+le fichier existe. La colonne `Vidéo (YouTube)` de la feuille reste
+réservée aux URLs YouTube ; les vidéos locales ne sont pas éditées par
+`media:import`.
+
 ## Cycle de travail
 
 1. **Une fois** : `npm run sheet:push` pour remplir la feuille Google
@@ -226,7 +259,9 @@ calculées (grises, protégées) sont toujours réécrites depuis le site.
 - réécrit l'onglet `Produits` (colonnes calculées resynchronisées, colonnes
   `Import` / `Message` remplies), l'historique et le rapport ;
 - importe les photos Drive et les vidéos YouTube (`media:import`) : WebP
-  1600 px, `cover` + `gallery` + `youtube` mis à jour.
+  1600 px, `cover` + `gallery` + `youtube` mis à jour ;
+- importe une livraison locale (`import-product-media.mjs`) et héberge les
+  vidéos dans `public/media/` (`videos`), sans YouTube.
 
 **Ne fait jamais :**
 - supprimer un produit ;

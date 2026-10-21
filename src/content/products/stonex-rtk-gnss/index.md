@@ -6,8 +6,6 @@ summary: "GNSS RTK haut de gamme Stonex avec carte mère multi-constellations et
 cover: "./cover.webp"
 gallery:
   - "./1.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 3900000

@@ -528,7 +528,7 @@ export function readCatalog() {
       order: raw ? (scalar(raw, "order") ?? 0) : 0,
       draft: raw ? scalar(raw, "draft") === true : false,
       images: images.length,
-      video: raw ? listOf(raw, "youtube").length : 0,
+      video: raw ? listOf(raw, "youtube").length + listOf(raw, "videos").length : 0,
       specs: raw ? blockEntryCount(raw, "specs") : 0,
       highlights: highlightPairs(raw),
       featuresCount: raw ? listOf(raw, "features").length : 0,

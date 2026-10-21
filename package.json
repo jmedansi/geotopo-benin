@@ -20,7 +20,9 @@
     "sheet:import": "node scripts/sheet-import.mjs",
     "sheet:simulate": "node scripts/sheet-import.mjs --dry-run",
     "sheet:test": "node scripts/sheet-test.mjs",
-    "media:import": "node scripts/media-import.mjs"
+    "media:import": "node scripts/media-import.mjs",
+    "media:local": "node scripts/import-product-media.mjs",
+    "media:local:dry": "node scripts/import-product-media.mjs --dry-run"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.2.1",

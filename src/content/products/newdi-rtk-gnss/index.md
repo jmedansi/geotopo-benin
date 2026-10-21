@@ -8,8 +8,6 @@ gallery:
   - "./1.webp"
   - "./2.webp"
   - "./3.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "En stock"
 price: 4600000
@@ -48,6 +46,8 @@ related:
   - "unistrong-g970ii-pro"
   - "south-rtk-gnss"
   - "foif-a90-rtk"
+videos:
+  - "/media/newdi-rtk-gnss/demo.mp4"
 ---
 
 ### Robustesse et Précision avec le NEWDI GNSS RTK

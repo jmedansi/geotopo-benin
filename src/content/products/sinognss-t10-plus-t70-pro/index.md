@@ -6,8 +6,8 @@ summary: "Système GNSS RTK complet avec récepteur compact T10+ et carnet terra
 cover: "./cover.webp"
 gallery:
   - "./1.webp"
-youtube:
-  - "dQw4w9WgXcQ"
+  - "./2.webp"
+  - "./3.webp"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 3150000

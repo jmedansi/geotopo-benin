@@ -8,8 +8,6 @@ gallery:
   - "./1.webp"
   - "./2.webp"
   - "./3.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "3 Semaines"
 price: 2800000

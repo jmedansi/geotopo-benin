@@ -4,8 +4,6 @@ category: "gnss-gps"
 brand: "Apeks"
 summary: "Système GNSS RTK Apeks AP10/AP30 ultra-compact pour levés topographiques et cadastraux de précision."
 cover: "./cover.webp"
-youtube:
-  - "dQw4w9WgXcQ"
 availability: "sur-commande"
 leadTime: "En stock à cotonou"
 price: 3750000
